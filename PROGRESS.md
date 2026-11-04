@@ -9,7 +9,7 @@ A free paycheck planner for real budgets: one job or two, any pay schedule. It s
 ## Where things stand (Nov 3, 2026)
 
 - **Live version:** 1.1.2 (English) at https://freeforgood-apps.github.io/till-payday/
-- 1.1.1 passed its self-test on a real iPhone (Nov 3, 2026). 1.1.2 (Nov 3, 2026: restoring an automatic copy no longer counts as a backup, matching Study Coach 2.5) passed in headless Chrome at three sizes, and both Claude copies were republished on 1.1.2 (Nov 3, 2026). **Still to do:** run the 1.1.2 self-test on the live site on a real iPhone.
+- 1.1.1 passed its self-test on a real iPhone (Nov 3, 2026). 1.1.2 (Nov 3, 2026: restoring an automatic copy no longer counts as a backup, matching Study Coach 2.5) passed in headless Chrome at three sizes, and both Claude copies were republished on 1.1.2 (Nov 3, 2026). 1.1.2 also passed on the live site on a real iPhone (Safari engine, iOS 18.7, 279 checks, Nov 3, 2026).
 - Every past version is kept in GitHub's history. To roll back, find the version in CHANGELOG.md and restore that upload.
 
 ## Where it lives
