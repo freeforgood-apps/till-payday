@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-3U9P0K8AWK8eigjl0puCDNvB9rDoFaNSf3Xc+5cqklg=' 'sha256-6X1rdT24E/MDdTzPMPMel3i9mxKaD753BZ6JLt/XtgE='; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src 'none'; manifest-src 'self'; worker-src 'self'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-src 'none'; media-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-YZsq/bUQCsAWXHwWC5I8RtVEiXSaFI2j5aiYKjOFJY8=' 'sha256-x9aVEw+MFJs3G+yaHdcreNZ3tDGMg6STZr2hNFh3LH8='; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src 'none'; manifest-src 'self'; worker-src 'self'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-src 'none'; media-src 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="description" content="A free paycheck planner. Make each check last till payday, and save a little every time.">
 <meta name="theme-color" content="#EDF2F0" media="(prefers-color-scheme: light)">
@@ -15,8 +15,8 @@
 <meta property="og:title" content="Till Payday">
 <meta property="og:description" content="A free paycheck planner. Make each check last till payday, and save a little every time.">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://freestudycoach.github.io/till-payday/">
-<meta property="og:image" content="https://freestudycoach.github.io/till-payday/icon-512.png">
+<meta property="og:url" content="https://freeforgood-apps.github.io/till-payday/">
+<meta property="og:image" content="https://freeforgood-apps.github.io/till-payday/icon-512.png">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
@@ -1107,7 +1107,7 @@ html.locked body { overflow: hidden; }
 
   <h3>Your privacy</h3>
   <ul id="aboutPrivacy"></ul>
-  <p class="foot" id="aboutCode">Till Payday's code is public, so anyone can check what it does: <a href="https://github.com/freestudycoach/till-payday" target="_blank" rel="noopener">github.com/freestudycoach/till-payday</a>.</p>
+  <p class="foot" id="aboutCode">Till Payday's code is public, so anyone can check what it does: <a href="https://github.com/freeforgood-apps/till-payday" target="_blank" rel="noopener">github.com/freeforgood-apps/till-payday</a>.</p>
   <button type="button" class="ghost danger" id="wipeAll">Delete everything from this device</button>
 
   <h3 id="aboutInstall">Keep your plan safe</h3>
@@ -1202,9 +1202,9 @@ html.locked body { overflow: hidden; }
   // The build swaps these two for the GitHub Pages copy (its own storage key, offline support)
   const LOCAL_KEY = "till-payday-selftest-v1";
   const WEB = true;
-  const APP_VERSION = "1.1";
-  const SITE = "https://freestudycoach.github.io/till-payday/";
-  const FEEDBACK_EMAIL = "freestudycoach@protonmail.com";
+  const APP_VERSION = "1.1.1";
+  const SITE = "https://freeforgood-apps.github.io/till-payday/";
+  const FEEDBACK_EMAIL = "freeforgood-apps+payday@proton.me";
   document.documentElement.lang = "en";
 
   const FREQ = {
@@ -4482,8 +4482,8 @@ html.locked body { overflow: hidden; }
   const KEY = "till-payday-selftest-v1";
   const REAL_KEY = "till-payday-v1";
   const WEBSITE = true;
-  const VERSION = "1.1";
-  const EMAIL = "freestudycoach@protonmail.com";
+  const VERSION = "1.1.1";
+  const EMAIL = "freeforgood-apps+payday@proton.me";
   const $ = (id) => document.getElementById(id);
   const q = (sel) => document.querySelector(sel);
   const qa = (sel) => Array.from(document.querySelectorAll(sel));
@@ -4777,7 +4777,8 @@ html.locked body { overflow: hidden; }
       set($("payEvery"), "weekly", "change");
       checkNext("Weekly", { every: "weekly", anchor: T - 3 });
       set($("payEvery"), "semimonthly", "change");
-      set($("payDay1"), "15", "change"); set($("payDay2"), "31", "change");
+      // Second box first: the guessed days can already include the 15th (paid on the 1st means "1st and 15th")
+      set($("payDay2"), "31", "change"); set($("payDay1"), "15", "change");
       checkNext("15th and last day", { every: "semimonthly", days: [15, 31] });
       set($("payDay1"), "10", "change"); set($("payDay2"), "30", "change");
       checkNext("10th and 30th", { every: "semimonthly", days: [10, 30] });
