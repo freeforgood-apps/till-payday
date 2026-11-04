@@ -1,35 +1,39 @@
 # Till Payday: progress
 
-New chat? Read this first. It replaces the old Claude Project instructions.
+New chat? Read this first. It replaces the old Claude Project instructions. Then read how-to-update.md before editing anything.
+
+## What it is
+
+A free paycheck planner for real budgets: one job or two, any pay schedule. It splits each paycheck into bills, savings and spending money, counts down to payday, and helps people save and pay off debt. README.md lists the main features.
 
 ## Where things stand (Nov 3, 2026)
 
-- **Live version:** 1.1.1 at https://freeforgood-apps.github.io/till-payday/
+- **Live version:** 1.1.1 (English) at https://freeforgood-apps.github.io/till-payday/
 - Passed its self-test on a real iPhone (Nov 3, 2026).
 - Every past version is kept in GitHub's history. To roll back, find the version in CHANGELOG.md and restore that upload.
 
+## Where it lives
+
+- **This repo is the latest source.** Claude's workspace is temporary, so anything worth keeping gets saved here.
+- `index.html` is the whole app, `selftest.html` the self-test, and `sw.js` handles offline use (its version goes up with each release). Also README.md, manifest.webmanifest and the icons. Files sit flat at the top of the repo (no folders).
+- **Claude copies:** two Claude pages, named "Till Payday" (saves to the Claude account) and "Till Payday Self-Test". Find them by name in the Claude artifacts list. Their links stay out of this repo.
+- **Old address:** freestudycoach.github.io/till-payday holds only a "we've moved" page that forwards people here and helps anyone with a plan saved there bring it along. Never put the app back there.
+- **Shared address:** freeforgood-apps.github.io is shared with Study Coach and more free apps to come. Each app keeps its own storage keys and offline cache names.
+
 ## Next up
 
-- Spanish version: on hold until the English version is settled.
+- Spanish version: built for 1.0 (561 phrases in US Spanish) and set aside. It needs the 1.1 text translated before it comes back.
 - Nothing else planned yet.
 
 ## Ground rules
 
-- Free forever. No ads, accounts, tracking or paid services.
-- Privacy first. Numbers stay only in the person's own browser (saved under `till-payday-v1`). The page blocks itself from sending anything over the internet.
-- Anonymous. No real names, personal emails or personal info in the code, commits or this repo. Commits use the account's private GitHub noreply address, and no links back to Claude chats.
-- Plain, warm wording for people living paycheck to paycheck.
-- It's a planning tool, not financial advice. It's a one-person volunteer project, built with help from AI.
-- Feedback goes to freeforgood-apps+payday@proton.me.
+- Free forever. No ads, accounts, tracking or paid services. Privacy first: everything stays on the device.
+- Anonymous. The only public identity is freeforgood-apps. Never tie the app to anyone's personal accounts or handles. No real names, personal emails, links to Claude chats or Claude page IDs in the code, commits or this repo. Commits use the account's private GitHub noreply address.
+- Plain, warm, simple wording, written for people living paycheck to paycheck.
+- It's a planning tool, not financial advice. The app says it's a one-person volunteer project, built with help from AI, so feedback replies may take time.
+- Feedback goes to freeforgood-apps+payday@proton.me. The self-test makes a report people can email in.
+- Verify before handing anything over: parse-check, run it in a browser, test awkward cases (empty data, old saved data, undo, small phone screens), check nothing else broke, and do the math in code. Then say what was checked and what couldn't be.
 
 ## How updates work
 
-1. Claude edits the files, runs the self-test in a headless browser, and saves the changes straight to GitHub. GitHub Pages updates the live site within a few minutes.
-2. Every new version gets a number in `index.html` (APP_VERSION) and in `sw.js` (CACHE), a CHANGELOG.md entry, and an update to this file.
-3. Afterward, open selftest.html on the iPhone to confirm it passes there too.
-
-## Things to know before editing
-
-- The page has a security rule with a fingerprint (hash) of its script. Any change to the script means that hash has to be updated, or the app won't run.
-- selftest.html carries its own copy of the app, so it has to be rebuilt after every change to index.html.
-- Files sit flat at the top of the repo (no folders).
+Follow how-to-update.md. It has the release steps, how rebuild.py works, and the things that must not break.
