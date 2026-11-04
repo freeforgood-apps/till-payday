@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-YZsq/bUQCsAWXHwWC5I8RtVEiXSaFI2j5aiYKjOFJY8=' 'sha256-x9aVEw+MFJs3G+yaHdcreNZ3tDGMg6STZr2hNFh3LH8='; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src 'none'; manifest-src 'self'; worker-src 'self'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-src 'none'; media-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-ZIrfOK4puN65RO9OEmEUGAX3VpsPwrb8YOWfbrXdHRc=' 'sha256-bDfY8JYiVs63pRg6YJDJqDf6GkvBBl9SsiUaV6abjI0='; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src 'none'; manifest-src 'self'; worker-src 'self'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-src 'none'; media-src 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="description" content="A free paycheck planner. Make each check last till payday, and save a little every time.">
 <meta name="theme-color" content="#EDF2F0" media="(prefers-color-scheme: light)">
@@ -1202,7 +1202,7 @@ html.locked body { overflow: hidden; }
   // The build swaps these two for the GitHub Pages copy (its own storage key, offline support)
   const LOCAL_KEY = "till-payday-selftest-v1";
   const WEB = true;
-  const APP_VERSION = "1.1.1";
+  const APP_VERSION = "1.1.2";
   const SITE = "https://freeforgood-apps.github.io/till-payday/";
   const FEEDBACK_EMAIL = "freeforgood-apps+payday@proton.me";
   document.documentElement.lang = "en";
@@ -4017,7 +4017,7 @@ html.locked body { overflow: hidden; }
     let plan = null;
     try { plan = JSON.parse(c.plan); } catch (err) {}
     if (!isPlan(plan)) { toast("That copy couldn't be read."); return; }
-    applyRestore(plan, "Copy from " + fmtDate(parseDate(c.day)) + " restored.");
+    applyRestore(plan, "Copy from " + fmtDate(parseDate(c.day)) + " restored.", false);
   });
   $("bkFile").addEventListener("click", async () => {
     if (!passReady()) return;
@@ -4098,12 +4098,13 @@ html.locked body { overflow: hidden; }
     renderLockedNote();
     applyRestore(plan, "Plan restored.");
   });
-  function applyRestore(plan, msg) {
+  // isBackup is false for an automatic copy: it's still only on this device, so it keeps its own backup record and reminders keep counting (same as Study Coach)
+  function applyRestore(plan, msg, isBackup = true) {
     const undo = snapshotForUndo();
     state = sanitize(plan);
     migratedOnLoad = false;
     settleAuto();
-    state.backup = { at: isoOf(today()), n: 0, snooze: "" };
+    if (isBackup) state.backup = { at: isoOf(today()), n: 0, snooze: "" };
     damaged = false; holdSave = false;
     renderAll();
     scheduleSave();
@@ -4482,7 +4483,7 @@ html.locked body { overflow: hidden; }
   const KEY = "till-payday-selftest-v1";
   const REAL_KEY = "till-payday-v1";
   const WEBSITE = true;
-  const VERSION = "1.1.1";
+  const VERSION = "1.1.2";
   const EMAIL = "freeforgood-apps+payday@proton.me";
   const $ = (id) => document.getElementById(id);
   const q = (sel) => document.querySelector(sel);
@@ -4956,6 +4957,34 @@ html.locked body { overflow: hidden; }
         ok("Right password restores the plan", !!(s && s.example === false && JSON.stringify(s.bills) === JSON.stringify(before.bills)));
       } else notes.push("Password backups: this browser can't encrypt, so the option is hidden");
       closeSheet();
+
+      // ---------- automatic copies (1.1.2) ----------
+      await step("Automatic copies");
+      {
+        flush();
+        const cur = saved(), d0 = new Date();
+        const dk = (n) => { const d = new Date(d0.getFullYear(), d0.getMonth(), d0.getDate() - n); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
+        const old = JSON.parse(JSON.stringify(cur)); old.backup = { at: dk(9), n: 12, snooze: "" }; old.bills = old.bills.slice(0, 1);
+        localStorage.setItem(KEY + "-copies", JSON.stringify([{ day: dk(1), at: new Date(Date.now() - 86400000).toISOString(), plan: JSON.stringify(old) }]));
+        openSheet("backup");
+        const cb = q('#bkCopies [data-copy="0"]');
+        ok("Automatic copies show in the backup sheet", shown("bkCopiesBox") && !!cb && /Yesterday/.test(cb.textContent));
+        click(cb); flush();
+        ok("Bringing back a copy asks for a second tap", !!cb && /Tap again/.test(cb.textContent) && JSON.stringify((saved() || {}).bills) === JSON.stringify(cur.bills));
+        click(cb);
+        for (let i = 0; i < 60 && !/Copy from/.test(toastText()); i++) await wait(100);
+        flush();
+        const back = saved();
+        ok("Bringing back a copy works", !!back && JSON.stringify(back.bills) === JSON.stringify(old.bills) && /Copy from .* restored/.test(toastText()));
+        ok("Bringing back a copy from this device doesn't count as a backup", !!back && back.backup.at === dk(9));
+        openSheet("backup"); set($("bkPaste"), code); click($("bkRestore")); click($("bkRestore"));
+        for (let i = 0; i < 60 && !/Plan restored/.test(toastText()); i++) await wait(100);
+        flush();
+        const s3 = saved();
+        ok("A real backup still counts as one", !!s3 && s3.backup.at === dk(0) && s3.backup.n === 0 && JSON.stringify(s3.bills) === JSON.stringify(before.bills));
+        localStorage.removeItem(KEY + "-copies");
+        closeSheet();
+      }
 
       // ---------- saving checks ----------
       await step("Saving checks");

@@ -1,5 +1,10 @@
 # Till Payday: changelog
 
+## 1.1.2 (Nov 3, 2026)
+- Bringing back an automatic copy no longer counts as a backup. The copy is still only on this device, so it keeps its own "last backed up" date and the backup reminders keep counting. Restoring a real backup (file or code) still counts, as before. This matches Study Coach 2.5.
+- The self-test now checks automatic copies: they show in the backup sheet, bringing one back takes two taps, it restores the right plan, it doesn't count as a backup, and a real backup still does. It caught both bugs planted on purpose.
+- Tested: the self-test passed in headless Chrome at phone size, small phone size in dark mode and desktop size (279 checks each). Not yet run on a real iPhone.
+
 ## 1.1.1 (Nov 3, 2026)
 - Moved to its new home at freeforgood-apps.github.io/till-payday, with the new GitHub link.
 - New feedback address: freeforgood-apps+payday@proton.me.
