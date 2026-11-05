@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-AomJKGOltE7l9rx8cXHSRrlLxe8KX/rWglDudFo7TC8='; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src 'none'; manifest-src 'self'; worker-src 'self'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-src 'none'; media-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-fXNALMlwu+J4xZNUeB1D6pFsSdvHPXUKlyveXSiQjK4='; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src 'none'; manifest-src 'self'; worker-src 'self'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-src 'none'; media-src 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="description" content="A free paycheck planner. Make each check last till payday, and save a little every time.">
 <meta name="theme-color" content="#EDF2F0" media="(prefers-color-scheme: light)">
@@ -48,7 +48,7 @@
   --bills: #5A7088;
   --save: #0E8A7E;
   --spend: #E0972B;
-  --good: #2C7A4C;
+  --good: #2B764A;
   --warn: #8F5E12;
   --bad: #B23A33;
   --good-bg: #DCEFE3;
@@ -189,9 +189,9 @@ input, select, textarea {
   background: var(--field); border: 1px solid transparent; border-radius: 9px;
   padding: 10px; width: 100%; min-width: 0; min-height: 44px;
 }
-input::placeholder, textarea::placeholder { color: var(--muted); opacity: 0.8; }
+input::placeholder, textarea::placeholder { color: var(--muted); opacity: 1; }
 input[type="checkbox"] { width: 24px; height: 24px; min-height: 0; padding: 0; margin: 0; accent-color: var(--accent); cursor: pointer; flex: 0 0 auto; }
-textarea { font: 400 0.875rem/1.45 var(--f-num); min-height: 9rem; resize: vertical; }
+textarea { font: 400 1rem/1.45 var(--f-num); min-height: 9rem; resize: vertical; }
 
 .money, .pct { position: relative; min-width: 0; }
 .money::before { content: "$"; position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); font-family: var(--f-num); pointer-events: none; }
@@ -328,7 +328,7 @@ details.more[open] summary::after { content: " ⌄"; }
   box-shadow: 0 8px 24px rgb(0 0 0 / 0.25);
   font-size: 0.9375rem;
 }
-.toast button { appearance: none; border: 0; background: transparent; color: var(--bg); font: 700 0.9375rem/1.2 var(--f-body); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; padding: 4px 2px; min-height: 44px; white-space: nowrap; }
+.toast button { appearance: none; border: 0; background: transparent; color: var(--bg); font: 700 0.9375rem/1.2 var(--f-body); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; padding: 4px 2px; min-height: 44px; min-width: 44px; white-space: nowrap; }
 
 /* Calculator sheet */
 body.calc-open { overflow: hidden; }
@@ -457,6 +457,13 @@ html[data-size="xl"] .field.wide { grid-template-columns: minmax(0, 1fr); }
 .bkstate.warn { color: var(--warn); }
 .filepick { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; pointer-events: none; }
 label.ghost { display: block; }
+/* The file input is hidden, so its keyboard focus shows on the button-style label in front of it */
+label.ghost:has(+ .filepick:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+/* PIN and password boxes in sheets: a visible label above each box */
+.pwfield { display: flex; flex-direction: column; gap: 6px; }
+.pwfield label { font-size: 0.9375rem; font-weight: 700; }
+.pwfield small { display: block; font-weight: 400; color: var(--muted); font-size: 0.8125rem; margin-top: 2px; }
+#pinOff, #pinOn { display: flex; flex-direction: column; gap: 12px; }
 .mailrow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
 .email { font-family: var(--f-num); font-size: 0.9375rem; user-select: all; -webkit-user-select: all; overflow-wrap: anywhere; }
 .mailrow .ghost { width: auto; }
@@ -1073,7 +1080,10 @@ html.locked body { overflow: hidden; }
   <p id="bkWhere"></p>
   <p class="bkstate" id="bkState"></p>
   <label class="toggle bkprotect" id="bkProtectRow"><input type="checkbox" id="bkProtect"><span>Protect it with a password<small>Optional. Nobody can open a protected backup without the password, and that includes you: a forgotten password can't be recovered.</small></span></label>
-  <input type="password" id="bkPass" placeholder="Password, at least 6 characters" autocomplete="new-password" aria-label="Backup password" hidden>
+  <div class="pwfield" id="bkPassBox" hidden>
+    <label for="bkPass">Backup password<small>At least 6 characters.</small></label>
+    <input type="password" id="bkPass" autocomplete="new-password" hidden>
+  </div>
   <button type="button" class="primary" id="bkFile">Save a backup file</button>
   <button type="button" class="ghost" id="bkCopy">Copy backup code</button>
   <p class="foot" id="bkTip">Keep it somewhere safe, like the Files app, Notes, or an email to yourself.</p>
@@ -1085,7 +1095,10 @@ html.locked body { overflow: hidden; }
   <input type="file" id="bkPick" class="filepick" accept=".json,.txt,application/json,text/plain">
   <textarea id="bkPaste" placeholder="Or paste a backup code here" aria-label="Backup code to restore" autocomplete="off" spellcheck="false"></textarea>
   <p class="foot" id="bkLockedNote" hidden>This backup has a password. Type it below, then tap Restore.</p>
-  <input type="password" id="bkRestorePass" placeholder="This backup's password" autocomplete="current-password" aria-label="Password for this backup" hidden>
+  <div class="pwfield" id="bkRestorePassBox" hidden>
+    <label for="bkRestorePass">This backup's password</label>
+    <input type="password" id="bkRestorePass" autocomplete="current-password" hidden>
+  </div>
   <button type="button" class="primary" id="bkRestore">Restore</button>
   <div id="bkCopiesBox" hidden>
     <hr>
@@ -1144,13 +1157,22 @@ html.locked body { overflow: hidden; }
   <p>Asks for a PIN when Till Payday opens, and again after it's been in the background for a minute. Good for a shared phone.</p>
   <div id="pinOff">
     <p class="foot">If you forget the PIN, the only way back in is to erase what's saved here and restore a backup. <button class="linkbtn" type="button" id="pinBackupFirst">Save a backup first</button></p>
-    <input type="password" id="pinNew" inputmode="numeric" autocomplete="off" maxlength="8" placeholder="New PIN, 4 to 8 numbers" aria-label="New PIN">
-    <input type="password" id="pinNew2" inputmode="numeric" autocomplete="off" maxlength="8" placeholder="Same PIN again" aria-label="New PIN again">
+    <div class="pwfield">
+      <label for="pinNew">New PIN<small>4 to 8 numbers.</small></label>
+      <input type="password" id="pinNew" inputmode="numeric" autocomplete="off" maxlength="8">
+    </div>
+    <div class="pwfield">
+      <label for="pinNew2">Type the same PIN again</label>
+      <input type="password" id="pinNew2" inputmode="numeric" autocomplete="off" maxlength="8">
+    </div>
     <button type="button" class="primary" id="pinSet">Turn on PIN lock</button>
   </div>
   <div id="pinOn" hidden>
     <p class="bkstate">PIN lock is on.</p>
-    <input type="password" id="pinOld" inputmode="numeric" autocomplete="off" maxlength="8" placeholder="Your PIN" aria-label="Your PIN">
+    <div class="pwfield">
+      <label for="pinOld">Your PIN</label>
+      <input type="password" id="pinOld" inputmode="numeric" autocomplete="off" maxlength="8">
+    </div>
     <button type="button" class="ghost" id="pinOffBtn">Turn off PIN lock</button>
   </div>
 </section>
@@ -1202,7 +1224,7 @@ html.locked body { overflow: hidden; }
   // The build swaps these two for the GitHub Pages copy (its own storage key, offline support)
   const LOCAL_KEY = "till-payday-v1";
   const WEB = true;
-  const APP_VERSION = "1.1.4";
+  const APP_VERSION = "1.1.5";
   const SITE = "https://freeforgood-apps.github.io/till-payday/";
   const FEEDBACK_EMAIL = "freeforgood-apps+payday@proton.me";
   document.documentElement.lang = "en";
@@ -2220,16 +2242,20 @@ html.locked body { overflow: hidden; }
       const lb = document.createElement("span"); lb.className = "lb";
       const t1 = document.createElement("b"); t1.textContent = plural(x.n, U.one);
       const t2 = document.createElement("span"); t2.textContent = dateLabel(x.d, P.now);
-      lb.append(t1, t2);
+      // Spaces between the pieces so the row's text reads as words ("1 month Dec 4", not "1 monthDec 4"); the layout ignores them
+      lb.append(t1, " ", t2);
       const tr = document.createElement("span"); tr.className = "tr"; tr.setAttribute("aria-hidden", "true");
       const fill = document.createElement("span"); fill.style.width = (x.c / max * 100) + "%"; tr.append(fill);
-      const v = document.createElement("span"); v.className = "v"; v.textContent = fmtSmart(x.c / 100);
+      const amtText = fmtSmart(x.c / 100);
+      const v = document.createElement("span"); v.className = "v"; v.textContent = amtText;
+      let hits = false;
       if (!goalShown && x.c >= targetC) {
-        goalShown = true;
-        const g = document.createElement("small"); g.textContent = "Hits goal"; v.append(g);
+        goalShown = hits = true;
+        const g = document.createElement("small"); g.textContent = "Hits goal"; v.append(" ", g);
       }
-      b.setAttribute("aria-label", plural(x.n, U.one) + ", " + fmtDate(x.d, true) + ": " + v.textContent);
-      b.append(lb, tr, v);
+      // The spoken name uses the same words as the row, so Voice Control and VoiceOver match what's on screen (WCAG 2.5.3)
+      b.setAttribute("aria-label", t1.textContent + ", " + t2.textContent + ": " + amtText + (hits ? ", hits goal" : ""));
+      b.append(lb, " ", tr, " ", v);
       return b;
     }));
 
@@ -2418,11 +2444,12 @@ html.locked body { overflow: hidden; }
       const skip = document.createElement("button");
       skip.type = "button"; skip.className = "ghost"; skip.dataset.wait = w.id; skip.dataset.act = "skip";
       skip.textContent = "Skip it";
-      skip.setAttribute("aria-label", "Skip " + (w.what || "it") + ", " + fmtSmart(w.amt));
+      // Spoken names start with the button's own words (WCAG 2.5.3)
+      skip.setAttribute("aria-label", "Skip it: " + what.textContent + ", " + amt.textContent);
       const buy = document.createElement("button");
       buy.type = "button"; buy.className = "ghost"; buy.dataset.wait = w.id; buy.dataset.act = "buy";
       buy.textContent = "I bought it";
-      buy.setAttribute("aria-label", "Bought " + (w.what || "it") + ", log " + fmtSmart(w.amt));
+      buy.setAttribute("aria-label", "I bought it: " + what.textContent + ", " + amt.textContent + ". Logs it.");
       btns.append(skip, buy);
       li.append(what, amt, day, btns);
       return li;
@@ -3018,19 +3045,46 @@ html.locked body { overflow: hidden; }
   });
 
   // ---- toast with undo ----
-  let toastTimer = null, undoFn = null;
+  // The toast waits while someone is on it (a finger, the mouse or keyboard focus). If it closes
+  // while focused, focus goes back to where the person was, not the top of the page (WCAG 2.2.1, 2.4.3).
+  const TOAST_MS = 5000, TOAST_UNDO_MS = 10000;
+  let toastTimer = null, undoFn = null, toastMs = TOAST_MS, toastHeld = false, toastBack = null;
+  const inToast = () => $("toast").contains(document.activeElement);
   function toast(msg, undo) {
     $("toastMsg").textContent = msg;
     undoFn = undo || null;
     $("toastUndo").hidden = !undo;
+    if (!inToast()) toastBack = document.activeElement;
     $("toast").hidden = false;
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => { $("toast").hidden = true; undoFn = null; }, undo ? 6500 : 3000);
+    toastMs = undo ? TOAST_UNDO_MS : TOAST_MS;
+    toastHeld = inToast();
+    armToast();
   }
+  function armToast() {
+    clearTimeout(toastTimer);
+    if (!toastHeld && !$("toast").hidden) toastTimer = setTimeout(() => { if (closeToast()) focusBack(); }, toastMs);
+  }
+  function closeToast() {
+    const hadFocus = inToast();
+    clearTimeout(toastTimer);
+    $("toast").hidden = true; undoFn = null; toastHeld = false;
+    return hadFocus;
+  }
+  function focusBack() {
+    const b = toastBack;
+    const back = b && b !== document.body && b.isConnected && b.offsetParent !== null ? b : document.querySelector('.tab[aria-selected="true"]');
+    if (back) back.focus({ preventScroll: true });
+  }
+  const holdToast = (on) => { toastHeld = on; armToast(); };
+  $("toast").addEventListener("focusin", () => holdToast(true));
+  $("toast").addEventListener("focusout", (e) => { if (!$("toast").contains(e.relatedTarget)) holdToast(false); });
+  $("toast").addEventListener("pointerenter", () => holdToast(true));
+  $("toast").addEventListener("pointerleave", () => holdToast(inToast()));
   $("toastUndo").addEventListener("click", () => {
-    const fn = undoFn;
-    $("toast").hidden = true; undoFn = null; clearTimeout(toastTimer);
-    if (fn) { fn(); toast("Undone"); }
+    const fn = undoFn, hadFocus = closeToast();
+    if (fn) fn();
+    if (hadFocus) focusBack();
+    if (fn) toast("Undone");
   });
   function snapshotForUndo() {
     const before = JSON.stringify(state);
@@ -3195,7 +3249,7 @@ html.locked body { overflow: hidden; }
     fc.n = parseInt(b.dataset.n, 10) || 1;
     saveFc();
     renderForecast(tracker(totals()));
-    $("fcCard").scrollIntoView({ block: "start", behavior: "smooth" });
+    $("fcCard").scrollIntoView({ block: "start", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
   });
   $("fcPots").addEventListener("click", (e) => {
     const b = e.target.closest("[data-pot]");
@@ -3962,7 +4016,7 @@ html.locked body { overflow: hidden; }
     const r = readBackup($("bkPaste").value);
     const locked = !!(r && r.locked);
     $("bkLockedNote").hidden = !locked;
-    $("bkRestorePass").hidden = !locked;
+    $("bkRestorePass").hidden = $("bkRestorePassBox").hidden = !locked;
   }
   function markBackedUp() {
     state.backup = { at: isoOf(today()), n: 0, snooze: "" };
@@ -3984,7 +4038,7 @@ html.locked body { overflow: hidden; }
     $("bkCopy").className = WEB ? "ghost" : "primary";
     $("bkTip").textContent = WEB ? "Keep it somewhere safe, like the Files app, Notes, or an email to yourself." : "Paste it somewhere safe, like Notes or an email to yourself.";
     $("bkProtectRow").hidden = !canCrypt();
-    $("bkPass").hidden = !$("bkProtect").checked;
+    $("bkPass").hidden = $("bkPassBox").hidden = !$("bkProtect").checked;
     renderLockedNote();
     // Automatic copies (this device only)
     const copies = mode === "local" ? readCopies() : [];
@@ -4000,7 +4054,7 @@ html.locked body { overflow: hidden; }
       return b;
     }));
   }
-  $("bkProtect").addEventListener("change", () => { $("bkPass").hidden = !$("bkProtect").checked; if ($("bkProtect").checked) $("bkPass").focus(); });
+  $("bkProtect").addEventListener("change", () => { $("bkPass").hidden = $("bkPassBox").hidden = !$("bkProtect").checked; if ($("bkProtect").checked) $("bkPass").focus(); });
   let copyArmed = null;
   $("bkCopies").addEventListener("click", (e) => {
     const b = e.target.closest("[data-copy]");

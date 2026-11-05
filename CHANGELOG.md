@@ -1,5 +1,19 @@
 # Till Payday: changelog
 
+## 1.1.5 (Nov 4, 2026)
+Fixes from a full accessibility check of every screen (WCAG 2.2 AA). Your numbers aren't affected.
+- Accessibility: the green "Ready", "Doable" and "Easy one" chips on Afford it?, and the extra-paycheck chip on Plan, are a touch darker green in light mode, so their words are easier to read. Contrast went from 4.38 to 4.61 (WCAG 1.4.3). They look the same.
+- Accessibility: the forecast rows on Savings and the Skip it / I bought it buttons on Afford it? are now read aloud with the words on screen, so Voice Control and VoiceOver match what you see (WCAG 2.5.3). A forecast row that reaches your goal now reads "hits goal" clearly.
+- Accessibility: the PIN boxes and the backup password boxes have labels above them, so you can still tell which box is which once you start typing (WCAG 3.3.2).
+- Accessibility: the hint text inside boxes (like "0" and "Shoes") is easier to read. Contrast went from 3.6 to 5.48 in light mode and from 4.24 to 5.77 in dark mode (WCAG 1.4.3).
+- Accessibility: the message bar at the bottom waits while you're on it (touching it, hovering over it, or with keyboard focus on Undo), and stays a bit longer: 10 seconds with Undo (was 6.5) and 5 without (was 3). After Undo, focus stays in the app instead of jumping to the top of the page (WCAG 2.2.1, 2.4.3).
+- Accessibility: iPhone no longer zooms in when you tap the box to paste a backup code. Its text is now 16px.
+- Accessibility: the Undo button is a full 44 points wide, so it's easier to tap.
+- Accessibility: with a keyboard, "Choose a backup file" now shows a focus ring (WCAG 2.4.7).
+- Accessibility: with Reduce Motion on, tapping a forecast row jumps there instead of scrolling smoothly.
+- The self-test now checks, on every screen it visits, that buttons are read by the words on them. It also checks that the PIN and password boxes have labels you can see, and that focus stays in the app after Undo. It caught all five bugs planted on purpose.
+- Tested: the self-test passed in headless Chrome at phone size, small phone size in dark mode and desktop size (286 checks each), including the privacy lock and the offline copy check. An automated accessibility check (axe-core 4.14 at four sizes in light and dark mode) found no problems on 14 screens and states: every tab, the calculator, the Backup, About and PIN sheets, the lock screen and extra-large text. Browser checks of each fix passed (22 of 22), including the message bar's timing and focus, contrast measured from the real colors, and opening offline. Backups made in 1.1.4, plain and with a password, restored exactly in 1.1.5. The security release check found nothing new. Still to do: the self-test and a VoiceOver check on a real iPhone on the live site.
+
 ## 1.1.4 (Nov 4, 2026)
 - Fixed: after opening the self-test (for example from About in the Home Screen app), Till Payday could show the self-test instead of your plan when opened without internet. Now only the app itself is saved for offline use, and updating to 1.1.4 clears out the wrong copy. Your numbers were never affected.
 - iPhone and iPad: the Home Screen tips now explain that the Home Screen app doesn't see what you saved in Safari, and how to bring your plan along with a backup code. This is on the "Make it an app" card, the backup reminder and in About.
