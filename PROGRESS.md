@@ -22,8 +22,12 @@ A free paycheck planner for real budgets: one job or two, any pay schedule. It s
 
 ## Next up
 
+- **Waiting on the owner:** add the v1.1.3 tag (Releases, from the phone; there are no tags yet), and run 1.1.3's self-test on a real iPhone on the live site.
+- **Small fixes found in the 1.1.3 checks (not started, ask first):**
+  - The Home Screen tip says the Home Screen app keeps its own data, but not that a plan made in Safari won't show up there, or how to bring it along with a backup code.
+  - The goal button (`#goalMini`) has a screen reader name ("Open your savings") that doesn't include its visible words (WCAG 2.5.3).
+  - `sw.js` still has a leftover branch for Google Fonts, which the app no longer loads.
 - Spanish version: built for 1.0 (561 phrases in US Spanish) and set aside. It needs the 1.1 text translated before it comes back.
-- Nothing else planned yet.
 - Keep the saving safety net matching Study Coach (backups, automatic copies, two-tap restore, damaged data set aside, reminders). Study Coach 2.5 copied it from here.
 
 ## Ground rules
