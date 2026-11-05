@@ -8,8 +8,9 @@ A free paycheck planner for real budgets: one job or two, any pay schedule. It s
 
 ## Where things stand (Nov 4, 2026)
 
-- **Live version:** 1.1.5 (English) at https://freeforgood-apps.github.io/till-payday/
-- 1.1.5 (Nov 4, 2026: nine accessibility fixes from a full check of every screen) passed its self-test in headless Chrome at three sizes (286 checks each), and the automated accessibility check found no problems on 14 screens and states. Both Claude copies were republished on 1.1.5 (Nov 4, 2026). It also passed its self-test on the live site on a real iPhone (Safari engine, iOS 18.7, 286 checks, Nov 5, 2026). **Still to do:** the 5-minute VoiceOver, zoom and Reduce Motion check from the accessibility-check skill, then record it here and in CHANGELOG.md.
+- **Live version:** 1.1.6 (English) at https://freeforgood-apps.github.io/till-payday/
+- 1.1.6 (Nov 5, 2026: iPhone date boxes no longer stick out of their card) passed its self-test in headless Chrome at three sizes (286 checks each). **Still to do:** on a real iPhone on the live site, run the self-test and look at both date boxes (Today's setup card, and Last payday on Plan), then record it here and in CHANGELOG.md. The Claude copies stay on 1.1.5 until they're republished.
+- 1.1.5 passed its self-test on the live site on a real iPhone (Safari engine, iOS 18.7, 286 checks, Nov 5, 2026) and the VoiceOver and Reduce Motion check. At zero brightness the gray text is faint; iPhone's Increase Contrast setting brightens it (the app already supports it).
 - Every past version is kept in GitHub's history. To roll back, find the version in CHANGELOG.md and restore that upload.
 
 ## Where it lives
@@ -43,6 +44,7 @@ Why some things are the way they are, so nobody "fixes" them by mistake:
 - **PIN and password boxes have real labels,** not just placeholders (WCAG 3.3.2). Each sits in a `.pwfield` box; the backup password ones show and hide together with their box (`bkPassBox`, `bkRestorePassBox`).
 - **Placeholder text is full strength** (`opacity: 1`), because the fade made it fall under 4.5:1.
 - **Text boxes use 16px text or more,** or iPhone zooms in when they're tapped.
+- **Date boxes use `appearance: none`.** Otherwise iPhone draws them wider than their card and centers the date. The self-test checks that every box fits inside its card.
 
 ## How updates work
 

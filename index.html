@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-fXNALMlwu+J4xZNUeB1D6pFsSdvHPXUKlyveXSiQjK4='; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src 'none'; manifest-src 'self'; worker-src 'self'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-src 'none'; media-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-hCAHi1X6KgEyM1ND0RKC8vkurwZXun2Q+ivu93UtQ9o='; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src 'none'; manifest-src 'self'; worker-src 'self'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-src 'none'; media-src 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="description" content="A free paycheck planner. Make each check last till payday, and save a little every time.">
 <meta name="theme-color" content="#EDF2F0" media="(prefers-color-scheme: light)">
@@ -190,6 +190,10 @@ input, select, textarea {
   padding: 10px; width: 100%; min-width: 0; min-height: 44px;
 }
 input::placeholder, textarea::placeholder { color: var(--muted); opacity: 1; }
+/* iPhone draws date boxes as its own button, wider than the space they're given and with the date centered.
+   Plain boxes keep them the same size and left alignment as every other box; tapping still opens the date picker. */
+input[type="date"] { -webkit-appearance: none; appearance: none; box-sizing: border-box; text-align: left; }
+input[type="date"]::-webkit-date-and-time-value { margin: 0; text-align: left; min-height: 1.2em; }
 input[type="checkbox"] { width: 24px; height: 24px; min-height: 0; padding: 0; margin: 0; accent-color: var(--accent); cursor: pointer; flex: 0 0 auto; }
 textarea { font: 400 1rem/1.45 var(--f-num); min-height: 9rem; resize: vertical; }
 
@@ -1224,7 +1228,7 @@ html.locked body { overflow: hidden; }
   // The build swaps these two for the GitHub Pages copy (its own storage key, offline support)
   const LOCAL_KEY = "till-payday-v1";
   const WEB = true;
-  const APP_VERSION = "1.1.5";
+  const APP_VERSION = "1.1.6";
   const SITE = "https://freeforgood-apps.github.io/till-payday/";
   const FEEDBACK_EMAIL = "freeforgood-apps+payday@proton.me";
   document.documentElement.lang = "en";

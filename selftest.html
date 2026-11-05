@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-VWlrcgcYzHsn9DLKOaa0pQv4eQn7Thy6ZOy6nmo9OVM=' 'sha256-h+GYJAia+wRuCYWxhHuNYzuD0Y6ZT8UdtEJqYzpEesk='; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src 'none'; manifest-src 'self'; worker-src 'self'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-src 'none'; media-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-pH82xATj8OihuenI7Z2wkNDvU8hG5LJLJLQtmZ4LOUQ=' 'sha256-36cNVdSUMglGmynAc6r+u16L3ep1cf44CRi1nM+zaks='; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src 'none'; manifest-src 'self'; worker-src 'self'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-src 'none'; media-src 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="description" content="A free paycheck planner. Make each check last till payday, and save a little every time.">
 <meta name="theme-color" content="#EDF2F0" media="(prefers-color-scheme: light)">
@@ -190,6 +190,10 @@ input, select, textarea {
   padding: 10px; width: 100%; min-width: 0; min-height: 44px;
 }
 input::placeholder, textarea::placeholder { color: var(--muted); opacity: 1; }
+/* iPhone draws date boxes as its own button, wider than the space they're given and with the date centered.
+   Plain boxes keep them the same size and left alignment as every other box; tapping still opens the date picker. */
+input[type="date"] { -webkit-appearance: none; appearance: none; box-sizing: border-box; text-align: left; }
+input[type="date"]::-webkit-date-and-time-value { margin: 0; text-align: left; min-height: 1.2em; }
 input[type="checkbox"] { width: 24px; height: 24px; min-height: 0; padding: 0; margin: 0; accent-color: var(--accent); cursor: pointer; flex: 0 0 auto; }
 textarea { font: 400 1rem/1.45 var(--f-num); min-height: 9rem; resize: vertical; }
 
@@ -1224,7 +1228,7 @@ html.locked body { overflow: hidden; }
   // The build swaps these two for the GitHub Pages copy (its own storage key, offline support)
   const LOCAL_KEY = "till-payday-selftest-v1";
   const WEB = true;
-  const APP_VERSION = "1.1.5";
+  const APP_VERSION = "1.1.6";
   const SITE = "https://freeforgood-apps.github.io/till-payday/";
   const FEEDBACK_EMAIL = "freeforgood-apps+payday@proton.me";
   document.documentElement.lang = "en";
@@ -4538,7 +4542,7 @@ html.locked body { overflow: hidden; }
   const KEY = "till-payday-selftest-v1";
   const REAL_KEY = "till-payday-v1";
   const WEBSITE = true;
-  const VERSION = "1.1.5";
+  const VERSION = "1.1.6";
   const EMAIL = "freeforgood-apps+payday@proton.me";
   const $ = (id) => document.getElementById(id);
   const q = (sel) => document.querySelector(sel);
@@ -4719,6 +4723,12 @@ html.locked body { overflow: hidden; }
       const vis = document.getElementById("app").innerText + " " + qa(".sheet:not([hidden])").map((s) => s.innerText).join(" ");
       for (const bad of ["undefined", "NaN", "Infinity", "[object", "null"]) if (new RegExp("\\b" + bad.replace("[", "\\[") + "\\b").test(vis)) fail(label + " shows “" + bad + "”");
       if (document.documentElement.scrollWidth > innerWidth + 1) fail(label + " scrolls sideways");
+      // Every box fits inside the space it's given. iPhone can draw date boxes wider than that (fixed in 1.1.6).
+      for (const f of qa("#app input, #app select, #app textarea")) {
+        if (f.offsetParent === null || ["checkbox", "radio", "range", "file", "hidden"].includes(f.type)) continue;
+        const r = f.getBoundingClientRect(), p = f.parentElement.getBoundingClientRect();
+        if (r.width > 0 && (r.left < p.left - 1 || r.right > p.right + 1)) fail(label + ": the box “" + (f.labels && f.labels[0] && f.labels[0].firstChild ? f.labels[0].firstChild.textContent.trim().slice(0, 40) : f.id) + "” sticks out of its card");
+      }
       // A button's spoken name must include the words on it, so Voice Control and VoiceOver match the screen (WCAG 2.5.3).
       // Buttons with fewer than 3 letters on them (×, Aa, icons) are skipped.
       const words = (t) => t.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
