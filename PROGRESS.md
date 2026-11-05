@@ -29,7 +29,7 @@ A free paycheck planner for real budgets: one job or two, any pay schedule. It s
 ## Ground rules
 
 - Free forever. No ads, accounts, tracking or paid services. Privacy first: everything stays on the device.
-- Anonymous. The only public identity is freeforgood-apps. Never tie the app to anyone's personal accounts or handles. No real names, personal emails, links to Claude chats or Claude page IDs in the code, commits or this repo. Commits use the account's private GitHub noreply address.
+- Anonymous. The only public identity is freeforgood-apps. Never tie the app to anyone's personal accounts or handles. No real names, personal emails, links to Claude chats or Claude page IDs in the code, commits or this repo. Commits use the account's private GitHub noreply address as the author, and keep Claude's default committer (Claude, noreply@anthropic.com) so GitHub shows them as Verified. Don't upload Claude's signing key to the account: it isn't ours and may be shared.
 - Plain, warm, simple wording, written for people living paycheck to paycheck.
 - It's a planning tool, not financial advice. The app says it's a one-person volunteer project, built with help from AI, so feedback replies may take time.
 - Feedback goes to freeforgood-apps+payday@proton.me. The self-test makes a report people can email in.
