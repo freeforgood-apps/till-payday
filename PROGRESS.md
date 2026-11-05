@@ -10,7 +10,7 @@ A free paycheck planner for real budgets: one job or two, any pay schedule. It s
 
 - **Live version:** 1.1.3 (English) at https://freeforgood-apps.github.io/till-payday/
 - 1.1.2 passed its self-test on the live site on a real iPhone (Safari engine, iOS 18.7, 279 checks, Nov 3, 2026). 1.1.3 (Nov 4, 2026: higher-contrast text on the teal payday strip) passed in headless Chrome at three sizes (279 checks each), and both Claude copies were republished on 1.1.3 (Nov 4, 2026). Its real-iPhone run on the live site is still to do.
-- Working versions are tagged on GitHub (v1.1.2, v1.1.3). Every past version is also kept in GitHub's history. To roll back, find the version in CHANGELOG.md and restore that upload or tag.
+- Every past version is kept in GitHub's history. To roll back, find the version in CHANGELOG.md and restore that upload.
 
 ## Where it lives
 
