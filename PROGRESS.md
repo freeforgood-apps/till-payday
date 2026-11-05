@@ -6,11 +6,11 @@ New chat? Read this first. It replaces the old Claude Project instructions. Then
 
 A free paycheck planner for real budgets: one job or two, any pay schedule. It splits each paycheck into bills, savings and spending money, counts down to payday, and helps people save and pay off debt. README.md lists the main features.
 
-## Where things stand (Nov 3, 2026)
+## Where things stand (Nov 4, 2026)
 
-- **Live version:** 1.1.2 (English) at https://freeforgood-apps.github.io/till-payday/
-- 1.1.1 passed its self-test on a real iPhone (Nov 3, 2026). 1.1.2 (Nov 3, 2026: restoring an automatic copy no longer counts as a backup, matching Study Coach 2.5) passed in headless Chrome at three sizes, and both Claude copies were republished on 1.1.2 (Nov 3, 2026). 1.1.2 also passed on the live site on a real iPhone (Safari engine, iOS 18.7, 279 checks, Nov 3, 2026).
-- Every past version is kept in GitHub's history. To roll back, find the version in CHANGELOG.md and restore that upload.
+- **Live version:** 1.1.3 (English) at https://freeforgood-apps.github.io/till-payday/
+- 1.1.2 passed its self-test on the live site on a real iPhone (Safari engine, iOS 18.7, 279 checks, Nov 3, 2026). 1.1.3 (Nov 4, 2026: higher-contrast text on the teal payday strip) passed in headless Chrome at three sizes (279 checks each), and both Claude copies were republished on 1.1.3 (Nov 4, 2026). Its real-iPhone run on the live site is still to do.
+- Working versions are tagged on GitHub (v1.1.2, v1.1.3). Every past version is also kept in GitHub's history. To roll back, find the version in CHANGELOG.md and restore that upload or tag.
 
 ## Where it lives
 
