@@ -9,21 +9,21 @@ A free paycheck planner for real budgets: one job or two, any pay schedule. It s
 ## Where things stand (Nov 4, 2026)
 
 - **Live version:** 1.1.3 (English) at https://freeforgood-apps.github.io/till-payday/
-- 1.1.2 passed its self-test on the live site on a real iPhone (Safari engine, iOS 18.7, 279 checks, Nov 3, 2026). 1.1.3 (Nov 4, 2026: higher-contrast text on the teal payday strip) passed in headless Chrome at three sizes (279 checks each), and both Claude copies were republished on 1.1.3 (Nov 4, 2026). Its real-iPhone run on the live site is still to do.
+- 1.1.2 passed its self-test on the live site on a real iPhone (Safari engine, iOS 18.7, 279 checks, Nov 3, 2026). 1.1.3 (Nov 4, 2026: higher-contrast text on the teal payday strip) passed in headless Chrome at three sizes (279 checks each), and both Claude copies were republished on 1.1.3 (Nov 4, 2026). It also passed on a real iPhone on the live site (Safari engine, iOS 18.7, 279 checks, Nov 4, 2026).
 - Every past version is kept in GitHub's history. To roll back, find the version in CHANGELOG.md and restore that upload.
 
 ## Where it lives
 
 - **This repo is the latest source.** Claude's workspace is temporary, so anything worth keeping gets saved here.
 - `index.html` is the whole app, `selftest.html` the self-test, and `sw.js` handles offline use (its version goes up with each release). Also README.md, manifest.webmanifest and the icons. Files sit flat at the top of the repo (no folders).
+- **Version tags** are added automatically. `.github/workflows/tag-new-versions.yml` reads APP_VERSION from `index.html` on every push to main and adds the tag (like `v1.1.4`) if it doesn't exist yet. Claude's sessions can't push tags themselves, which is why it's done this way. Earlier versions (1.1.2 and before) have no tags.
 - **Claude copies:** two Claude pages, named "Till Payday" (saves to the Claude account) and "Till Payday Self-Test". Find them by name in the Claude artifacts list. Their links stay out of this repo.
 - **Old address:** freestudycoach.github.io/till-payday holds only a "we've moved" page that forwards people here and helps anyone with a plan saved there bring it along. Never put the app back there. How it works is in how-to-update.md.
 - **Shared address:** freeforgood-apps.github.io is shared with Study Coach and more free apps to come. Each app keeps its own storage keys and offline cache names.
 
 ## Next up
 
-- **Waiting on the owner:** add the v1.1.3 tag (Releases, from the phone; there are no tags yet), and run 1.1.3's self-test on a real iPhone on the live site.
-- **Small fixes found in the 1.1.3 checks (not started, ask first):**
+- **Small fixes found in the 1.1.3 checks (approved, in progress for 1.1.4):**
   - The Home Screen tip says the Home Screen app keeps its own data, but not that a plan made in Safari won't show up there, or how to bring it along with a backup code.
   - The goal button (`#goalMini`) has a screen reader name ("Open your savings") that doesn't include its visible words (WCAG 2.5.3).
   - `sw.js` still has a leftover branch for Google Fonts, which the app no longer loads.

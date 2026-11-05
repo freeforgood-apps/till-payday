@@ -20,7 +20,7 @@ This repo (freeforgood-apps/till-payday) is the source. `index.html` is the whol
 - **Storage keys. Never rename them, or people lose their plans.** The website uses `till-payday-v1`, the Claude page `shareable-payday-planner-v1`, and the self-test `till-payday-selftest-v1`. Other keys add a suffix (`-copies`, `-pin`, `-new`, etc.).
 - **The offline cache name** must start with `till-payday-`. The site shares freeforgood-apps.github.io with Study Coach and other apps, and sw.js only clears its own caches.
 - **No outside requests.** Fonts are built in (Atkinson Hyperlegible, Bricolage Grotesque, DM Mono, all SIL Open Font License). Don't add Google Fonts or any CDN back. The lock would block them anyway.
-- **APP_VERSION** in the app and the version in sw.js must match. rebuild.py sets both.
+- **APP_VERSION** in the app and the version in sw.js must match. rebuild.py sets both. The tagging workflow (`.github/workflows/tag-new-versions.yml`) reads it to add the version tag, so keep it written as `APP_VERSION = "X.Y.Z"`.
 - **Website-only parts** (file downloads, calendar file, install card, offline) are switched by `const WEB`. The Claude page has `WEB = false` and saves to the Claude account instead.
 - **Calendar event IDs** still end in `@freestudycoach.github.io` on purpose. Changing them would make re-added reminders show up twice in people's calendars.
 ## The old address
