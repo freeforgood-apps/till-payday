@@ -18,6 +18,7 @@ This repo (freeforgood-apps/till-payday) is the source. `index.html` is the whol
 ## Things that must not break
 - **The privacy lock.** `index.html` and `selftest.html` carry a Content-Security-Policy that only lets scripts run whose exact sha256 fingerprint is listed. Any edit to a script changes its fingerprint. Always run `rebuild.py` after editing, or the app won't start.
 - **Storage keys. Never rename them, or people lose their plans.** The website uses `till-payday-v1`, the Claude page `shareable-payday-planner-v1`, and the self-test `till-payday-selftest-v1`. Other keys add a suffix (`-copies`, `-pin`, `-new`, etc.).
+- **The offline copy is only the app.** sw.js saves a page for offline use only when it's the app itself (`./` or `index.html`), so opening the self-test can't replace it (fixed in 1.1.4; the self-test checks this).
 - **The offline cache name** must start with `till-payday-`. The site shares freeforgood-apps.github.io with Study Coach and other apps, and sw.js only clears its own caches.
 - **No outside requests.** Fonts are built in (Atkinson Hyperlegible, Bricolage Grotesque, DM Mono, all SIL Open Font License). Don't add Google Fonts or any CDN back. The lock would block them anyway.
 - **APP_VERSION** in the app and the version in sw.js must match. rebuild.py sets both. The tagging workflow (`.github/workflows/tag-new-versions.yml`) reads it to add the version tag, so keep it written as `APP_VERSION = "X.Y.Z"`.
