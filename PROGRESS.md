@@ -8,8 +8,9 @@ A free paycheck planner for real budgets: one job or two, any pay schedule. It s
 
 ## Where things stand (Nov 4, 2026)
 
-- **Live version:** 1.1.4 (English) at https://freeforgood-apps.github.io/till-payday/
-- 1.1.3 passed its self-test on the live site on a real iPhone (Safari engine, iOS 18.7, 279 checks, Nov 4, 2026). 1.1.4 (Nov 4, 2026: offline copy fix, Home Screen tips, goal button name for VoiceOver) passed in headless Chrome at three sizes (280 checks each), and both Claude copies were republished on 1.1.4 (Nov 4, 2026). It also passed on a real iPhone on the live site (Safari engine, iOS 18.7, 280 checks, Nov 4, 2026).
+- **Live version:** 1.1.5 (English) at https://freeforgood-apps.github.io/till-payday/
+- 1.1.5 (Nov 4, 2026: nine accessibility fixes from a full check of every screen) passed its self-test in headless Chrome at three sizes (286 checks each), and the automated accessibility check found no problems on 14 screens and states. **Still to do:** run the self-test on the live site on a real iPhone, plus the 5-minute VoiceOver, zoom and Reduce Motion check from the accessibility-check skill, then record both here and in CHANGELOG.md.
+- 1.1.4 passed its self-test on the live site on a real iPhone (Safari engine, iOS 18.7, 280 checks, Nov 4, 2026).
 - Every past version is kept in GitHub's history. To roll back, find the version in CHANGELOG.md and restore that upload.
 
 ## Where it lives
@@ -34,6 +35,15 @@ A free paycheck planner for real budgets: one job or two, any pay schedule. It s
 - It's a planning tool, not financial advice. The app says it's a one-person volunteer project, built with help from AI, so feedback replies may take time.
 - Feedback goes to freeforgood-apps+payday@proton.me. The self-test makes a report people can email in.
 - Verify before handing anything over: parse-check, run it in a browser, test awkward cases (empty data, old saved data, undo, small phone screens), check nothing else broke, and do the math in code. Then say what was checked and what couldn't be.
+
+## Decisions
+
+Why some things are the way they are, so nobody "fixes" them by mistake:
+- **Spoken names use the words on screen** (WCAG 2.5.3). A button with an aria-label must include its visible words, like the forecast rows ("1 month, Dec 4: $500", the same short date shown) and Skip it / I bought it. The self-test checks this on every screen it visits. The forecast row's pieces have plain spaces between them so its text reads as words; the layout ignores those spaces.
+- **The message bar waits while someone is on it** (touch, mouse or keyboard focus), lasts 10 seconds with Undo and 5 without, and puts focus back after Undo (WCAG 2.2.1, 2.4.3). If it seems to "stick", check whether the mouse is resting on it: that's on purpose.
+- **PIN and password boxes have real labels,** not just placeholders (WCAG 3.3.2). Each sits in a `.pwfield` box; the backup password ones show and hide together with their box (`bkPassBox`, `bkRestorePassBox`).
+- **Placeholder text is full strength** (`opacity: 1`), because the fade made it fall under 4.5:1.
+- **Text boxes use 16px text or more,** or iPhone zooms in when they're tapped.
 
 ## How updates work
 
