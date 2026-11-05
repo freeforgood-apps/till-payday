@@ -3,7 +3,7 @@
 ## 1.1.6 (Nov 5, 2026)
 - Fixed: on iPhone, the "Your last payday" and "Last payday" date boxes stuck out past their card and showed the date centered. They now match the other boxes, with the same width and the date on the left. Tapping still opens the date picker.
 - The self-test now checks, on every screen it visits, that every box fits inside its card. It caught this date-box problem when it was planted on purpose.
-- Tested: the self-test passed in headless Chrome at phone size, small phone size in dark mode and desktop size (286 checks each). With the date-box problem planted on purpose, the new check failed on both date boxes. An automated accessibility check (axe-core 4.14 at four sizes in light and dark mode) found no problems, and the security scan of the changes found nothing. Still to do: on a real iPhone on the live site, run the self-test and look at both date boxes. The fix is for iPhone, which headless Chrome can't show.
+- Tested: the self-test passed in headless Chrome at phone size, small phone size in dark mode and desktop size (286 checks each). With the date-box problem planted on purpose, the new check failed on both date boxes. An automated accessibility check (axe-core 4.14 at four sizes in light and dark mode) found no problems, and the security scan of the changes found nothing. Both Claude copies were republished. Still to do: on a real iPhone on the live site, run the self-test and look at both date boxes. The fix is for iPhone, which headless Chrome can't show.
 
 ## 1.1.5 (Nov 4, 2026)
 Fixes from a full accessibility check of every screen (WCAG 2.2 AA). Your numbers aren't affected.

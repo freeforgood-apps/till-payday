@@ -9,7 +9,7 @@ A free paycheck planner for real budgets: one job or two, any pay schedule. It s
 ## Where things stand (Nov 4, 2026)
 
 - **Live version:** 1.1.6 (English) at https://freeforgood-apps.github.io/till-payday/
-- 1.1.6 (Nov 5, 2026: iPhone date boxes no longer stick out of their card) passed its self-test in headless Chrome at three sizes (286 checks each). **Still to do:** on a real iPhone on the live site, run the self-test and look at both date boxes (Today's setup card, and Last payday on Plan), then record it here and in CHANGELOG.md. The Claude copies stay on 1.1.5 until they're republished.
+- 1.1.6 (Nov 5, 2026: iPhone date boxes no longer stick out of their card) passed its self-test in headless Chrome at three sizes (286 checks each). **Still to do:** on a real iPhone on the live site, run the self-test and look at both date boxes (Today's setup card, and Last payday on Plan), then record it here and in CHANGELOG.md. Both Claude copies were republished on 1.1.6 (Nov 5, 2026).
 - 1.1.5 passed its self-test on the live site on a real iPhone (Safari engine, iOS 18.7, 286 checks, Nov 5, 2026) and the VoiceOver and Reduce Motion check. At zero brightness the gray text is faint; iPhone's Increase Contrast setting brightens it (the app already supports it).
 - Every past version is kept in GitHub's history. To roll back, find the version in CHANGELOG.md and restore that upload.
 
