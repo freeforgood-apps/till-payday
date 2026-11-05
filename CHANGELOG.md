@@ -1,5 +1,14 @@
 # Till Payday: changelog
 
+## 1.1.4 (Nov 4, 2026)
+- Fixed: after opening the self-test (for example from About in the Home Screen app), Till Payday could show the self-test instead of your plan when opened without internet. Now only the app itself is saved for offline use, and updating to 1.1.4 clears out the wrong copy. Your numbers were never affected.
+- iPhone and iPad: the Home Screen tips now explain that the Home Screen app doesn't see what you saved in Safari, and how to bring your plan along with a backup code. This is on the "Make it an app" card, the backup reminder and in About.
+- Accessibility: VoiceOver now reads the savings goal button by the words on it (goal name, percent and progress) instead of a different label (WCAG 2.5.3).
+- Tidied up: removed leftover offline code for Google Fonts, which the app hasn't loaded since its fonts were built in.
+- The self-test checks that the saved offline copy is the app and not the self-test. It caught the old behavior when that was put back on purpose.
+- Version tags (like v1.1.4) are now added on GitHub automatically when a new version goes live. 1.1.3 was the first.
+- Tested: the self-test passed in headless Chrome at phone size, small phone size in dark mode and desktop size (280 checks each), including the privacy lock. Offline in headless Chrome: after opening the self-test, the app still opened offline, and a phone that already had the wrong copy from 1.1.3 got the right one after updating. An automated accessibility check (axe-core 4.14 at four sizes in light and dark mode, plus About open) found no problems, and the goal button's spoken name now matches its words. The security release check found nothing new. Both Claude copies were republished. Still to do: run the self-test on the live site on a real iPhone.
+
 ## 1.1.3 (Nov 4, 2026)
 - Accessibility: easier-to-read text on the teal payday strip. In dark mode, the smaller text ("Next payday", "in 9 days", the day count) is a touch darker. The pace chip ("On track", "Doing great") has a lighter tint in both themes, so its words stand out more. Everything on the strip now meets the WCAG AA contrast minimum of 4.5:1: dark-mode small text went from 4.50 to 4.63, and the chip went from 4.14 to 4.69 in light mode and from 5.54 to 6.18 in dark mode.
 - Tested: the self-test passed in headless Chrome at phone size, small phone size in dark mode and desktop size (279 checks each), including the privacy lock. An automated accessibility check (axe-core 4.14 at four sizes in light and dark mode) found no contrast problems left, and side-by-side screenshots show the same look. Both Claude copies were republished. On the live site, the self-test passed on a real iPhone (Safari engine, iOS 18.7, 279 checks), including the privacy lock and offline use.

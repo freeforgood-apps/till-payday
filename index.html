@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-YizPUsHFK4JlOaW/0kvoDvaPShhy+iw65vwoR2DoPIg='; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src 'none'; manifest-src 'self'; worker-src 'self'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-src 'none'; media-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-AomJKGOltE7l9rx8cXHSRrlLxe8KX/rWglDudFo7TC8='; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src 'none'; manifest-src 'self'; worker-src 'self'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-src 'none'; media-src 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="description" content="A free paycheck planner. Make each check last till payday, and save a little every time.">
 <meta name="theme-color" content="#EDF2F0" media="(prefers-color-scheme: light)">
@@ -754,7 +754,7 @@ html.locked body { overflow: hidden; }
       </details>
     </div>
 
-    <button class="goalmini" type="button" id="goalMini" aria-label="Open your savings">
+    <button class="goalmini" type="button" id="goalMini">
       <span class="gm-top"><span class="gm-name" id="gmName">Emergency fund</span><span class="gm-pct" id="gmPct">15%</span></span>
       <span class="progress"><span id="gmBar" style="width:15%"></span></span>
       <span class="gm-sub" id="gmSub">Around Jun 2027</span>
@@ -1202,7 +1202,7 @@ html.locked body { overflow: hidden; }
   // The build swaps these two for the GitHub Pages copy (its own storage key, offline support)
   const LOCAL_KEY = "till-payday-v1";
   const WEB = true;
-  const APP_VERSION = "1.1.3";
+  const APP_VERSION = "1.1.4";
   const SITE = "https://freeforgood-apps.github.io/till-payday/";
   const FEEDBACK_EMAIL = "freeforgood-apps+payday@proton.me";
   document.documentElement.lang = "en";
@@ -3825,7 +3825,7 @@ html.locked body { overflow: hidden; }
     card.hidden = !(bk && bk.card);
     if (bk && bk.card) {
       card.classList.toggle("overdue", bk.level === "overdue");
-      const extra = WEB && isIOS() && !isStandalone() ? " Adding Till Payday to your Home Screen helps too." : "";
+      const extra = WEB && isIOS() && !isStandalone() ? " Adding Till Payday to your Home Screen helps too, and a backup code is how you bring your plan into it." : "";
       if (bk.level === "first") {
         $("bkCardTitle").textContent = "Keep your plan safe";
         $("bkCardHead").textContent = "Save a backup of your plan";
@@ -3846,7 +3846,7 @@ html.locked body { overflow: hidden; }
     // Home Screen note for people using the website in a browser tab
     $("installCard").hidden = !(WEB && !installHidden && !isStandalone() && !state.example && !(bk && bk.card));
     $("installText").textContent = isIOS()
-      ? "Add Till Payday to your Home Screen. It opens like an app, works without internet, and keeps Safari from clearing your numbers after a week away."
+      ? "Add Till Payday to your Home Screen. It opens like an app, works without internet, and keeps Safari from clearing your numbers after a week away. The Home Screen app starts fresh, so copy a backup code first, then restore it there."
       : "Add Till Payday to your Home Screen. It opens like an app and works without internet.";
     $("privacyNote").textContent = mode === "db" ? "Your numbers are private. Anyone else who opens this link sees only their own."
       : "Your numbers are saved only on this device. Nothing is sent anywhere.";
@@ -4135,6 +4135,7 @@ html.locked body { overflow: hidden; }
     const backupTip = ["Back up now and then. ", "The Plan tab has Back up or restore my plan, and Till Payday reminds you when it's been a while."];
     const safe = WEB ? [
       ["iPhone or iPad: ", "open Till Payday in Safari, tap Share, then Add to Home Screen."],
+      ["Bring your plan along: ", "on iPhone and iPad, the Home Screen app doesn't see what you saved in Safari. Before you add it, copy a backup code (Plan tab, Back up or restore my plan), then restore it in the Home Screen app."],
       ["Android: ", "open it in Chrome, tap the ⋮ menu, then Add to Home screen or Install app."],
       ["Safari can clear saved data ", "from websites you haven't opened in 7 days. The Home Screen app keeps its own data, so it avoids that."],
       backupTip

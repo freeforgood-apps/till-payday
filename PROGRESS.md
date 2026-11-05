@@ -8,8 +8,8 @@ A free paycheck planner for real budgets: one job or two, any pay schedule. It s
 
 ## Where things stand (Nov 4, 2026)
 
-- **Live version:** 1.1.3 (English) at https://freeforgood-apps.github.io/till-payday/
-- 1.1.2 passed its self-test on the live site on a real iPhone (Safari engine, iOS 18.7, 279 checks, Nov 3, 2026). 1.1.3 (Nov 4, 2026: higher-contrast text on the teal payday strip) passed in headless Chrome at three sizes (279 checks each), and both Claude copies were republished on 1.1.3 (Nov 4, 2026). It also passed on a real iPhone on the live site (Safari engine, iOS 18.7, 279 checks, Nov 4, 2026).
+- **Live version:** 1.1.4 (English) at https://freeforgood-apps.github.io/till-payday/
+- 1.1.3 passed its self-test on the live site on a real iPhone (Safari engine, iOS 18.7, 279 checks, Nov 4, 2026). 1.1.4 (Nov 4, 2026: offline copy fix, Home Screen tips, goal button name for VoiceOver) passed in headless Chrome at three sizes (280 checks each), and both Claude copies were republished on 1.1.4 (Nov 4, 2026). Its real-iPhone run on the live site is still to do.
 - Every past version is kept in GitHub's history. To roll back, find the version in CHANGELOG.md and restore that upload.
 
 ## Where it lives
@@ -23,10 +23,6 @@ A free paycheck planner for real budgets: one job or two, any pay schedule. It s
 
 ## Next up
 
-- **Small fixes found in the 1.1.3 checks (approved, in progress for 1.1.4):**
-  - The Home Screen tip says the Home Screen app keeps its own data, but not that a plan made in Safari won't show up there, or how to bring it along with a backup code.
-  - The goal button (`#goalMini`) has a screen reader name ("Open your savings") that doesn't include its visible words (WCAG 2.5.3).
-  - `sw.js` still has a leftover branch for Google Fonts, which the app no longer loads.
 - Spanish version: built for 1.0 (561 phrases in US Spanish) and set aside. It needs the 1.1 text translated before it comes back.
 - Keep the saving safety net matching Study Coach (backups, automatic copies, two-tap restore, damaged data set aside, reminders). Study Coach 2.5 copied it from here.
 
