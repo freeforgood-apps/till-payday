@@ -2,7 +2,7 @@
 
 ## 1.1.3 (Nov 4, 2026)
 - Accessibility: easier-to-read text on the teal payday strip. In dark mode, the smaller text ("Next payday", "in 9 days", the day count) is a touch darker. The pace chip ("On track", "Doing great") has a lighter tint in both themes, so its words stand out more. Everything on the strip now meets the WCAG AA contrast minimum of 4.5:1: dark-mode small text went from 4.50 to 4.63, and the chip went from 4.14 to 4.69 in light mode and from 5.54 to 6.18 in dark mode.
-- Tested: the self-test passed in headless Chrome at phone size, small phone size in dark mode and desktop size (279 checks each), including the privacy lock. An automated accessibility check (axe-core 4.14 at four sizes in light and dark mode) found no contrast problems left, and side-by-side screenshots show the same look. Both Claude copies were republished. Still to do: run the self-test on the live site on a real iPhone.
+- Tested: the self-test passed in headless Chrome at phone size, small phone size in dark mode and desktop size (279 checks each), including the privacy lock. An automated accessibility check (axe-core 4.14 at four sizes in light and dark mode) found no contrast problems left, and side-by-side screenshots show the same look. Both Claude copies were republished. On the live site, the self-test passed on a real iPhone (Safari engine, iOS 18.7, 279 checks), including the privacy lock and offline use.
 
 ## 1.1.2 (Nov 3, 2026)
 - Bringing back an automatic copy no longer counts as a backup. The copy is still only on this device, so it keeps its own "last backed up" date and the backup reminders keep counting. Restoring a real backup (file or code) still counts, as before. This matches Study Coach 2.5.
