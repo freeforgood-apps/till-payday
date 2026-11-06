@@ -24,6 +24,7 @@ A free paycheck planner for real budgets: one job or two, any pay schedule. It s
 
 ## Next up
 
+- Restore checks, for the next release (found Nov 5, 2026, comparing with the shared kit in freeforgood-apps/toolkit): `readBackup()` and `sanitize()` already rebuild clean data from known fields only. Still missing: a size cap on pasted codes and backup files, and a friendly "this backup is from a newer version, update the app first" message (right now a newer backup would restore with its new parts quietly dropped).
 - Spanish version: built for 1.0 (561 phrases in US Spanish) and set aside. It needs the 1.1 text translated before it comes back.
 - Keep the saving safety net matching Study Coach (backups, automatic copies, two-tap restore, damaged data set aside, reminders). Study Coach 2.5 copied it from here.
 
