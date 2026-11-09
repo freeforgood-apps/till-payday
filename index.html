@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-hCAHi1X6KgEyM1ND0RKC8vkurwZXun2Q+ivu93UtQ9o='; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src 'none'; manifest-src 'self'; worker-src 'self'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-src 'none'; media-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-5dcrYlGn1FpqJkDqTDVrF5KAE2nPQXfpnvE0LRyEDlU='; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src 'none'; manifest-src 'self'; worker-src 'self'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-src 'none'; media-src 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="description" content="A free paycheck planner. Make each check last till payday, and save a little every time.">
 <meta name="theme-color" content="#EDF2F0" media="(prefers-color-scheme: light)">
@@ -451,6 +451,8 @@ html[data-size="xl"] .field.wide { grid-template-columns: minmax(0, 1fr); }
   padding: 16px; display: flex; flex-direction: column; gap: 12px;
 }
 .sheet:focus { outline: none; }
+/* Sheets and the calculator scroll as flex columns. Without this, a button with min-height gets squashed and its wrapped text spills out. */
+.sheet > *, .calc > * { flex-shrink: 0; }
 .sheet h3 { font-family: var(--f-display); font-weight: 600; font-size: 1.0625rem; margin: 8px 0 0; text-wrap: balance; }
 .sheet p, .sheet li { font-size: 0.9375rem; }
 .sheet ul, .sheet ol { margin: 0; padding-left: 1.25em; display: flex; flex-direction: column; gap: 6px; }
@@ -1228,7 +1230,7 @@ html.locked body { overflow: hidden; }
   // The build swaps these two for the GitHub Pages copy (its own storage key, offline support)
   const LOCAL_KEY = "till-payday-v1";
   const WEB = true;
-  const APP_VERSION = "1.1.6";
+  const APP_VERSION = "1.1.7";
   const SITE = "https://freeforgood-apps.github.io/till-payday/";
   const FEEDBACK_EMAIL = "freeforgood-apps+payday@proton.me";
   document.documentElement.lang = "en";

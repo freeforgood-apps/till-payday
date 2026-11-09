@@ -1,5 +1,9 @@
 # Till Payday: changelog
 
+## 1.1.7 (Nov 9, 2026)
+- Fixed: in About, the red "Delete everything from this device" button could get squashed, so its words spilled out past the bottom of the button. This happened on small phones and with bigger text. The button now grows to fit its words. The same fix stops the Back up buttons getting squashed at the biggest text size. Your numbers aren't affected.
+- Tested: the self-test passed in headless Chrome at phone size, small phone size in dark mode and desktop size (286 checks each), including the privacy lock. A browser check opened every sheet and the calculator at three screen sizes, three text sizes and both themes (18 runs): before the fix, the Delete button's words spilled out in 8 runs; after it, in none. Comparing the height of every item in every sheet before and after, only the squashed buttons changed. An automated accessibility check (axe-core 4.14 at four sizes in light and dark mode) found no new problems on the main screen or with the About and Back up sheets open, and the security scan of the changes found nothing. Both Claude copies were republished. Still to do: on a real iPhone on the live site, look at the Delete button in About and run the self-test.
+
 ## 1.1.6 (Nov 5, 2026)
 - Fixed: on iPhone, the "Your last payday" and "Last payday" date boxes stuck out past their card and showed the date centered. They now match the other boxes, with the same width and the date on the left. Tapping still opens the date picker.
 - The self-test now checks, on every screen it visits, that every box fits inside its card. It caught this date-box problem when it was planted on purpose.

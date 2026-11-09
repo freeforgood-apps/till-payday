@@ -6,10 +6,11 @@ New chat? Read this first. It replaces the old Claude Project instructions. Then
 
 A free paycheck planner for real budgets: one job or two, any pay schedule. It splits each paycheck into bills, savings and spending money, counts down to payday, and helps people save and pay off debt. README.md lists the main features.
 
-## Where things stand (Nov 4, 2026)
+## Where things stand (Nov 9, 2026)
 
-- **Live version:** 1.1.6 (English) at https://freeforgood-apps.github.io/till-payday/
-- 1.1.6 (Nov 5, 2026: iPhone date boxes no longer stick out of their card) passed its self-test in headless Chrome at three sizes (286 checks each). **Still to do:** on a real iPhone on the live site, run the self-test and look at both date boxes (Today's setup card, and Last payday on Plan), then record it here and in CHANGELOG.md. Both Claude copies were republished on 1.1.6 (Nov 5, 2026).
+- **Live version:** 1.1.7 (English) at https://freeforgood-apps.github.io/till-payday/
+- 1.1.7 (Nov 9, 2026: the red Delete button in About no longer gets squashed with its words spilling out, on small phones or with bigger text) passed its self-test in headless Chrome at three sizes (286 checks each). **Still to do:** on a real iPhone on the live site, look at the Delete button in About and run the self-test, then record it here and in CHANGELOG.md. Both Claude copies were republished on 1.1.7 (Nov 9, 2026).
+- 1.1.6 (Nov 5, 2026: iPhone date boxes no longer stick out of their card) passed its self-test in headless Chrome at three sizes (286 checks each). Its real-iPhone check (self-test and both date boxes) was never recorded; fold it into the 1.1.7 iPhone check.
 - 1.1.5 passed its self-test on the live site on a real iPhone (Safari engine, iOS 18.7, 286 checks, Nov 5, 2026) and the VoiceOver and Reduce Motion check. At zero brightness the gray text is faint; iPhone's Increase Contrast setting brightens it (the app already supports it).
 - Every past version is kept in GitHub's history. To roll back, find the version in CHANGELOG.md and restore that upload.
 
@@ -46,6 +47,7 @@ Why some things are the way they are, so nobody "fixes" them by mistake:
 - **Placeholder text is full strength** (`opacity: 1`), because the fade made it fall under 4.5:1.
 - **Text boxes use 16px text or more,** or iPhone zooms in when they're tapped.
 - **Date boxes use `appearance: none`.** Otherwise iPhone draws them wider than their card and centers the date. The self-test checks that every box fits inside its card.
+- **Everything directly inside a sheet or the calculator has `flex-shrink: 0`.** They scroll as flex columns, and without it a button with `min-height` gets squashed to 44px and its wrapped words spill out (the Delete button in About, 1.1.7).
 
 ## How updates work
 
