@@ -9,8 +9,7 @@ This repo (freeforgood-apps/till-payday) is the source. `index.html` is the whol
    - `index.html`: the edited app with the privacy lock refreshed
    - `selftest.html`: the self-test, rebuilt from the edited app
    - `sw.js`: the offline cache, renamed to the new version so phones update
-   - `artifact.html`: publish to the Claude page named "Till Payday"
-   - `selftest-artifact.html`: publish to the Claude page named "Till Payday Self-Test"
+   - `artifact.html` and `selftest-artifact.html`: the Claude copies. **Retired Nov 9, 2026: don't publish them on releases.** They stay on 1.1.8 with a "moved" note. Use these files only for a safety or data fix to the old copies (see PROGRESS.md).
 4. Test everything the "Verify" rule in PROGRESS.md lists, and run the self-test.
 5. Save `index.html`, `selftest.html` and `sw.js` to this repo, plus README.md if it changed, a new CHANGELOG.md entry, and an update to PROGRESS.md. All files sit flat at the top of the repo. They can also be uploaded by hand from a phone.
 6. Run the self-test on the live site afterwards, on a real iPhone.

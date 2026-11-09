@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-5dcrYlGn1FpqJkDqTDVrF5KAE2nPQXfpnvE0LRyEDlU='; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src 'none'; manifest-src 'self'; worker-src 'self'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-src 'none'; media-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Si0LnMKo74ZnL6hgSI70UJfyPak3cBz33S15OjiQA74='; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src 'none'; manifest-src 'self'; worker-src 'self'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-src 'none'; media-src 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="description" content="A free paycheck planner. Make each check last till payday, and save a little every time.">
 <meta name="theme-color" content="#EDF2F0" media="(prefers-color-scheme: light)">
@@ -590,6 +590,16 @@ html.locked body { overflow: hidden; }
 
   <!-- Today -->
   <section class="panel" id="view-today" role="tabpanel" aria-labelledby="tab-today">
+    <div class="result" id="movedCard" hidden>
+      <p class="result-title">Till Payday has moved</p>
+      <p class="foot">This copy inside Claude won't get updates anymore. Your plan is still here, and it keeps working.</p>
+      <p class="foot">The free website gets every update, works without internet, and can go on your Home Screen: <a href="https://freeforgood-apps.github.io/till-payday/" target="_blank" rel="noopener">freeforgood-apps.github.io/till-payday</a></p>
+      <p class="foot">To bring your plan along, copy a backup code here. Then open the website, go to the Plan tab, tap Back up or restore my plan, and paste the code.</p>
+      <div class="actions">
+        <button class="ghost" type="button" data-open="backup">Get my backup code</button>
+      </div>
+    </div>
+
     <div class="result setup" id="setupCard">
       <p class="result-title">Make it yours</p>
       <p class="headline">These are example numbers.</p>
@@ -1230,7 +1240,7 @@ html.locked body { overflow: hidden; }
   // The build swaps these two for the GitHub Pages copy (its own storage key, offline support)
   const LOCAL_KEY = "till-payday-v1";
   const WEB = true;
-  const APP_VERSION = "1.1.7";
+  const APP_VERSION = "1.1.8";
   const SITE = "https://freeforgood-apps.github.io/till-payday/";
   const FEEDBACK_EMAIL = "freeforgood-apps+payday@proton.me";
   document.documentElement.lang = "en";
@@ -3903,6 +3913,8 @@ html.locked body { overflow: hidden; }
     // Plan line
     $("bkPlanLine").textContent = mode === "db" ? "Saved to your account. A backup file is extra peace of mind."
       : state.backup.at ? "Last backup: " + fmtDate(parseDate(state.backup.at), true) : "No backup yet";
+    // The Claude copies are retired (Nov 2026): point people to the website
+    $("movedCard").hidden = WEB;
     // Home Screen note for people using the website in a browser tab
     $("installCard").hidden = !(WEB && !installHidden && !isStandalone() && !state.example && !(bk && bk.card));
     $("installText").textContent = isIOS()

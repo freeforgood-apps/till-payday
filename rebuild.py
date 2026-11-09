@@ -3,8 +3,8 @@
 The repo's index.html is the source. This makes the other three files from it, and refreshes the privacy lock:
   index.html            the website (privacy lock refreshed to match the edited code)
   selftest.html         the website self-test (the app on its own storage + the test runner taken from the current selftest.html)
-  artifact.html         the Claude page (publish to the Till Payday artifact)
-  selftest-artifact.html  the Claude self-test (publish to the Self-Test artifact)
+  artifact.html         the Claude page (retired Nov 2026: publish only for a safety or data fix)
+  selftest-artifact.html  the Claude self-test (retired Nov 2026, same)
 
 Usage:  python3 rebuild.py <folder with index.html and selftest.html> [new version like 1.2]
 Writes into <folder>/out/. With a version, it also sets APP_VERSION in the app, the self-test, and sw.js.
