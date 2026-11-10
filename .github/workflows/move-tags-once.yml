@@ -1,0 +1,62 @@
+# One-off: after the history was rewritten to show commit dates in UTC (Nov 2026),
+# this moves each version tag to the same version's new commit. It runs once when
+# this file is pushed, and the file is removed right after. It uses no outside
+# actions and installs nothing.
+name: Move tags once
+
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/move-tags-once.yml]
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: move-tags-once
+  cancel-in-progress: false
+
+jobs:
+  move:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write # only to move the tags
+    steps:
+      - name: Move each tag to its rewritten commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          pairs='v1.1.3 19067d53143d01a48dcd1003dfbbda62ea828dbf
+          v1.1.4 c53b8d3f4f1d13d34ff4b1ba9631894c70413559
+          v1.1.5 b5ac105e830c74c1b766f30695243521bd0566e8
+          v1.1.6 968bef9b0eabc63e07ec59b28b969134f3b11aba
+          v1.1.7 eb16fe7ba7de400f409c6bfc937d9290f845ec16
+          v1.1.8 27e9a0cf65900ca04c67f969ec1cbc154c41a5b0'
+
+          # Check every pair first, so nothing moves unless all of them are right
+          while read -r tag sha <&3; do
+            status=$(gh api "repos/$REPO/compare/$sha...main" --jq .status)
+            if [ "$status" != "ahead" ] && [ "$status" != "identical" ]; then
+              echo "$sha isn't on main ($status), so no tags were moved."
+              exit 1
+            fi
+            app=$(gh api -H "Accept: application/vnd.github.raw" "repos/$REPO/contents/index.html?ref=$sha")
+            version=$(printf '%s\n' "$app" | grep -oE 'APP_VERSION = "[0-9]+\.[0-9]+\.[0-9]+"' | head -n 1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || true)
+            if [ "v$version" != "$tag" ]; then
+              echo "$sha shows version '$version', not $tag, so no tags were moved."
+              exit 1
+            fi
+          done 3<<< "$pairs"
+
+          while read -r tag sha <&3; do
+            current=$(gh api "repos/$REPO/git/ref/tags/$tag" --jq .object.sha)
+            if [ "$current" = "$sha" ]; then
+              echo "$tag is already at $sha."
+              continue
+            fi
+            gh api -X PATCH "repos/$REPO/git/refs/tags/$tag" -f sha="$sha" -F force=true --silent
+            echo "Moved $tag from $current to $sha."
+          done 3<<< "$pairs"
