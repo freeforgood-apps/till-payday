@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-PA7mVn2hm1MOdd5ve+i1vcUKWTN8jjKNybcR/Nbjg9c=' 'sha256-FU/7X6uOsgRdFJOvf8FglO3947h4cAQPM8FOEaERDu8='; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src 'none'; manifest-src 'self'; worker-src 'self'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-src 'none'; media-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Ic01BlxToZgogBl+iFgLLgaC2JOOiYH1NOXk2I0DcQQ=' 'sha256-ra1kgLmcPTwEcKzNXfBdqy5akPXTpFXsS82iPe5/STE='; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src 'none'; manifest-src 'self'; worker-src 'self'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-src 'none'; media-src 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="description" content="A free paycheck planner. Make each check last till payday, and save a little every time.">
 <meta name="theme-color" content="#EDF2F0" media="(prefers-color-scheme: light)">
@@ -1240,7 +1240,7 @@ html.locked body { overflow: hidden; }
   // The build swaps these two for the GitHub Pages copy (its own storage key, offline support)
   const LOCAL_KEY = "till-payday-selftest-v1";
   const WEB = true;
-  const APP_VERSION = "1.1.9";
+  const APP_VERSION = "1.1.10";
   const SITE = "https://freeforgood-apps.github.io/till-payday/";
   const FEEDBACK_EMAIL = "freeforgood-apps+payday@proton.me";
   document.documentElement.lang = "en";
@@ -1426,11 +1426,13 @@ html.locked body { overflow: hidden; }
   }
 
   // ---- state ----
+  // The saved plan's shape. Raise it (with an upgrade step in sanitize) when that shape changes, so older versions know a plan is newer than they are.
+  const DATA_V = 5;
   function defaults() {
     const now = today();
     const t = isoOf(now);
     return {
-      v: 5, example: true, paid: {}, periodPay: {}, marks: {}, wait: [], skipped: { n: 0, amt: 0 },
+      v: DATA_V, example: true, paid: {}, periodPay: {}, marks: {}, wait: [], skipped: { n: 0, amt: 0 },
       backup: { at: "", n: 0, snooze: "" },
       spends: [
         { id: "x1", d: t, amt: 12.5, note: "Food", ex: true },
@@ -1547,7 +1549,7 @@ html.locked body { overflow: hidden; }
     const seenDebt = new Set();
     for (const x of debts) { while (seenDebt.has(x.id)) x.id = rid(); seenDebt.add(x.id); }
     return {
-      v: 5,
+      v: DATA_V,
       example,
       lastPayday: parseDate(o.lastPayday) ? o.lastPayday : d.lastPayday,
       pay: { every, days },
@@ -3972,6 +3974,9 @@ html.locked body { overflow: hidden; }
 
   // A backup is the plan as JSON: a file, or the same text as a copyable code
   const BK_PREFIX = "TILLPAY1:";
+  const BK_FORMAT = 2;   // newest backup wrapper this version reads: 1 plain, 2 with a password
+  const BK_MAX = 5e6;    // the most a pasted code or file can be (the shared kit's cap). The biggest real plan is far smaller.
+  const NEWER_MSG = "This backup is from a newer Till Payday. Close the app, open it again while online to update, then restore.";
   const backupJSON = () => JSON.stringify({ app: "Till Payday", format: 1, saved: isoOf(today()), plan: state });
   function toB64(str) {
     const bytes = new TextEncoder().encode(str);
@@ -4014,9 +4019,12 @@ html.locked body { overflow: hidden; }
     toast("Type a password of at least 6 characters, or turn the password off.");
     return false;
   }
-  // A plan, { locked } for a password-protected backup, or null
+  const isPlan = (p) => !!(p && typeof p === "object" && Array.isArray(p.incomes) && Array.isArray(p.bills));
+  const tooNew = (p) => Number(p && p.v) > DATA_V;   // restoring it here would quietly drop the parts this version doesn't know
+  // A plan, { locked } for a password-protected backup, { newer } for one from a newer Till Payday, { big } for one too big to be real, or null
   function readBackup(text) {
     let t = String(text || "").trim(), obj = null;
+    if (t.length > BK_MAX) return { big: true };
     try {
       if (t.startsWith("{")) obj = JSON.parse(t);
       else {
@@ -4025,11 +4033,14 @@ html.locked body { overflow: hidden; }
         obj = JSON.parse(fromB64(t));
       }
     } catch (e) { return null; }
-    if (obj && typeof obj === "object" && obj.encrypted && typeof obj.encrypted === "object" && obj.encrypted.data) return { locked: obj.encrypted };
-    const plan = obj && typeof obj === "object" && obj.plan && typeof obj.plan === "object" ? obj.plan : obj;
-    return plan && Array.isArray(plan.incomes) && Array.isArray(plan.bills) ? plan : null;
+    if (!obj || typeof obj !== "object") return null;
+    const ours = obj.app === "Till Payday";
+    if (ours && Number(obj.format) > BK_FORMAT) return { newer: true };
+    if (obj.encrypted && typeof obj.encrypted === "object" && obj.encrypted.data) return Number(obj.encrypted.v) > 1 ? { newer: true } : { locked: obj.encrypted };
+    const plan = obj.plan && typeof obj.plan === "object" ? obj.plan : obj;
+    if (tooNew(plan) && (ours || isPlan(plan))) return { newer: true };
+    return isPlan(plan) ? plan : null;
   }
-  const isPlan = (p) => !!(p && typeof p === "object" && Array.isArray(p.incomes) && Array.isArray(p.bills));
   function renderLockedNote() {
     const r = readBackup($("bkPaste").value);
     const locked = !!(r && r.locked);
@@ -4132,11 +4143,12 @@ html.locked body { overflow: hidden; }
     const f = e.target.files && e.target.files[0];
     e.target.value = "";
     if (!f) return;
-    if (f.size > 5e6) { toast("That file is too big to be a Till Payday backup."); return; }
+    if (f.size > BK_MAX) { toast("That file is too big to be a Till Payday backup."); return; }
     const r = new FileReader();
     r.onload = () => {
       const got = readBackup(r.result);
-      if (!got) { toast("That file isn't a Till Payday backup."); return; }
+      if (got && got.newer) { toast(NEWER_MSG); return; }
+      if (!got || got.big) { toast("That file isn't a Till Payday backup."); return; }
       $("bkPaste").value = String(r.result);
       resetRestore();
       renderLockedNote();
@@ -4151,7 +4163,13 @@ html.locked body { overflow: hidden; }
   $("bkPaste").addEventListener("input", () => { resetRestore(); renderLockedNote(); });
   $("bkRestore").addEventListener("click", async () => {
     const got = readBackup($("bkPaste").value);
-    if (!got) { $("bkPaste").focus(); toast($("bkPaste").value.trim() ? "That doesn't look like a Till Payday backup. Check you copied all of it." : "Choose a backup file or paste a code first."); return; }
+    if (!got || got.big || got.newer) {
+      $("bkPaste").focus();
+      toast(got && got.newer ? NEWER_MSG
+        : got ? "That's too big to be a Till Payday backup. Check you pasted only the backup code."
+        : $("bkPaste").value.trim() ? "That doesn't look like a Till Payday backup. Check you copied all of it." : "Choose a backup file or paste a code first.");
+      return;
+    }
     if (got.locked && !$("bkRestorePass").value) { renderLockedNote(); $("bkRestorePass").focus(); toast("This backup has a password. Type it first."); return; }
     if (!restoreArmed && !state.example && !damaged) {
       $("bkRestore").textContent = "Tap again to replace your plan";
@@ -4164,6 +4182,7 @@ html.locked body { overflow: hidden; }
     if (got.locked) {
       try { plan = JSON.parse(await unlockText(got.locked, $("bkRestorePass").value)); }
       catch (e) { $("bkRestorePass").select(); toast(canCrypt() ? "That password doesn't open this backup." : "This browser can't open password-protected backups."); return; }
+      if (tooNew(plan)) { toast(NEWER_MSG); return; }
       if (!isPlan(plan)) { toast("That backup couldn't be read."); return; }
     }
     $("bkPaste").value = ""; $("bkRestorePass").value = "";
@@ -4556,7 +4575,7 @@ html.locked body { overflow: hidden; }
   const KEY = "till-payday-selftest-v1";
   const REAL_KEY = "till-payday-v1";
   const WEBSITE = true;
-  const VERSION = "1.1.9";
+  const VERSION = "1.1.10";
   const EMAIL = "freeforgood-apps+payday@proton.me";
   const $ = (id) => document.getElementById(id);
   const q = (sel) => document.querySelector(sel);
@@ -5054,6 +5073,80 @@ html.locked body { overflow: hidden; }
         ok("Right password restores the plan", !!(s && s.example === false && JSON.stringify(s.bills) === JSON.stringify(before.bills)));
       } else notes.push("Password backups: this browser can't encrypt, so the option is hidden");
       closeSheet();
+
+      // ---------- restore checks (1.1.10): too big, from a newer version, and older backups ----------
+      {
+        const b64 = (str) => { const u = new TextEncoder().encode(str); let bin = ""; for (let i = 0; i < u.length; i += 0x8000) bin += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(bin); };
+        const asCode = (o) => "TILLPAY1:" + b64(JSON.stringify(o));
+        let wrap = null;
+        try { wrap = JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(code.slice(9)), (c) => c.charCodeAt(0)))); } catch (e) {}
+        ok("Backup code holds the plan", !!(wrap && wrap.app === "Till Payday" && wrap.format === 1 && wrap.plan && wrap.plan.v >= 5));
+        const dataV = wrap && wrap.plan ? wrap.plan.v : 5;
+        flush();
+        const keep = localStorage.getItem(KEY);
+        const untouched = () => { flush(); return localStorage.getItem(KEY) === keep; };
+        const said = async (re) => { for (let i = 0; i < 60 && !re.test(toastText()); i++) await wait(100); return re.test(toastText()); };
+        const tryCode = (c) => { $("toastMsg").textContent = ""; set($("bkPaste"), c); click($("bkRestore")); };
+        const NEWER = /newer Till Payday.*update/;
+        openSheet("backup");
+        // A huge paste is turned away. The box is hidden meanwhile so the phone doesn't have to draw 5 MB of text.
+        $("bkPaste").style.display = "none";
+        tryCode("TILLPAY1:" + "A".repeat(5e6));
+        ok("A pasted code that's too big is turned away", (await said(/too big/)) && untouched());
+        set($("bkPaste"), ""); $("bkPaste").style.display = "";
+        const newer = JSON.parse(JSON.stringify(wrap || {})); if (newer.plan) { newer.plan.v = dataV + 1; newer.plan.later = { kept: true }; }
+        tryCode(asCode(newer));
+        ok("A backup from a newer version says to update first", (await said(NEWER)) && untouched());
+        tryCode(asCode({ app: "Till Payday", format: 3, saved: iso(T), later: {} }));
+        ok("A newer kind of backup says to update first", (await said(NEWER)) && untouched());
+        // Backup files: too big, from a newer version, and a normal one
+        let files = true;
+        const pick = (parts, name) => { const dt = new DataTransfer(); dt.items.add(new File(parts, name, { type: "application/json" })); $("bkPick").files = dt.files; $("bkPick").dispatchEvent(new Event("change", { bubbles: true })); };
+        try { new DataTransfer().items.add(new File(["x"], "x.json")); } catch (e) { files = false; }
+        if (files) {
+          set($("bkPaste"), "");
+          $("toastMsg").textContent = ""; pick([new Uint8Array(5e6 + 1)], "big.json");
+          ok("A backup file that's too big is turned away", (await said(/too big/)) && !$("bkPaste").value && untouched());
+          $("toastMsg").textContent = ""; pick([JSON.stringify(newer)], "till-payday-backup-newer.json");
+          ok("A backup file from a newer version says to update first", (await said(NEWER)) && !$("bkPaste").value && untouched());
+          $("toastMsg").textContent = ""; pick([JSON.stringify(wrap)], "till-payday-backup.json");
+          ok("A backup file loads, ready to restore", (await said(/Backup loaded/)) && /"format":1/.test($("bkPaste").value) && untouched());
+          set($("bkPaste"), "");
+        } else notes.push("Backup files: this browser can't make a test file, so picking a file wasn't tried");
+        if (window.crypto && crypto.subtle) {
+          // Locked here the same way the app does it, written separately (PBKDF2-SHA256, then AES-256-GCM)
+          const raw = (buf) => { const u = new Uint8Array(buf); let s = ""; for (let i = 0; i < u.length; i++) s += String.fromCharCode(u[i]); return btoa(s); };
+          const lockIt = async (text, pass) => {
+            const salt = crypto.getRandomValues(new Uint8Array(16)), iv = crypto.getRandomValues(new Uint8Array(12)), iter = 1000;
+            const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(pass), "PBKDF2", false, ["deriveKey"]);
+            const key = await crypto.subtle.deriveKey({ name: "PBKDF2", salt, iterations: iter, hash: "SHA-256" }, base, { name: "AES-GCM", length: 256 }, false, ["encrypt"]);
+            return { v: 1, kdf: "PBKDF2-SHA256", cipher: "AES-256-GCM", iter, salt: raw(salt), iv: raw(iv), data: raw(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, new TextEncoder().encode(text))) };
+          };
+          let enc = null;
+          try { enc = await lockIt(JSON.stringify(newer.plan), "self-test password"); } catch (e) {}
+          ok("Locked a test backup", !!enc);
+          if (enc) {
+            tryCode(asCode({ app: "Till Payday", format: 2, saved: iso(T), encrypted: enc }));
+            set($("bkRestorePass"), "self-test password"); click($("bkRestore")); click($("bkRestore"));   // the second tap confirms replacing the plan
+            ok("A newer password backup says to update first, once it's open", (await said(NEWER)) && untouched());
+            tryCode(asCode({ app: "Till Payday", format: 2, saved: iso(T), encrypted: Object.assign({}, enc, { v: 2 }) }));
+            ok("A newer kind of password lock says to update first", (await said(NEWER)) && untouched());
+          }
+          set($("bkRestorePass"), ""); set($("bkPaste"), "");
+        }
+        // Older backups still restore: one from before backups had a wrapper, with the single savings amount older versions had
+        const older = { incomes: [{ id: "i1", name: "Old job", amount: 800, freq: "biweekly" }], bills: [{ id: "b1", name: "Old rent", amount: 700, freq: "monthly", due: 1 }],
+          save: { amount: 40, freq: "biweekly", auto: false }, goal: { name: "Rainy day", target: 500, saved: 120 }, lastPayday: iso(T - 2) };
+        tryCode(asCode(older)); click($("bkRestore"));
+        await said(/Plan restored/); flush();
+        const o2 = saved();
+        ok("An older backup still restores", !!(o2 && o2.v === dataV && o2.incomes[0].name === "Old job" && o2.bills[0].name === "Old rent" && o2.saves.length === 1 && o2.saves[0].amount === 40 && o2.saves[0].have === 120));
+        // Back to the self-test's plan for the rest of the run
+        openSheet("backup"); tryCode(code); click($("bkRestore"));
+        await said(/Plan restored/); flush();
+        ok("Back to the test plan", JSON.stringify((saved() || {}).bills) === JSON.stringify(before.bills));
+        closeSheet();
+      }
 
       // ---------- automatic copies (1.1.2) ----------
       await step("Automatic copies");

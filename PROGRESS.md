@@ -8,7 +8,8 @@ A free paycheck planner for real budgets: one job or two, any pay schedule. It s
 
 ## Where things stand (Nov 10, 2026)
 
-- **Live version:** 1.1.9 (English) at https://freeforgood-apps.github.io/till-payday/
+- **Live version:** 1.1.10 (English) at https://freeforgood-apps.github.io/till-payday/
+- 1.1.10 (Nov 10, 2026: the restore checks. A pasted code over 5 MB is turned away, like files already were, and a backup from a newer version asks to update first instead of restoring with its new parts dropped) passed the toolkit's release check: versions agree, privacy lock up to date, self-test in headless Chrome at three sizes (326 checks each), accessibility checker clean at 4 sizes in light and dark, no security pattern leads. Seven planted bugs were each caught. **Still to do:** the self-test on the live site on a real iPhone.
 - 1.1.9 (Nov 10, 2026: added SECURITY.md and .gitignore from the Baseline kit; the app itself is unchanged) passed the toolkit's release check: versions agree, privacy lock up to date, self-test in headless Chrome at three sizes (286 checks each), accessibility checker clean at 4 sizes in light and dark, no security pattern leads. On the live site on a real iPhone (Safari engine, iOS 18.7, Nov 10, 2026), its self-test passed in a Safari tab (286 checks). It said Safari hasn't promised to keep the data, which iPhone often doesn't; backup codes cover that.
 - 1.1.8 (Nov 9, 2026: the Claude copy now says Till Payday has moved to the website; the website is unchanged) and 1.1.7 (Nov 9, 2026: the red Delete button in About no longer gets squashed with its words spilling out, on small phones or with bigger text) passed their self-tests in headless Chrome at three sizes (286 checks each). On the live site on a real iPhone (Safari engine, iOS 18.7, Nov 9, 2026), 1.1.8's self-test passed in a Safari tab and from the Home Screen app (286 checks each), and the red Delete button in About looked right. Both reports said Safari hasn't promised to keep the data, which iPhone often doesn't; backup codes cover that.
 - **The Claude copies are retired** (Nov 9, 2026). Both were republished one last time on 1.1.8 and get no more updates. See "Where it lives".
@@ -29,7 +30,7 @@ A free paycheck planner for real budgets: one job or two, any pay schedule. It s
 
 - Small: on a 320px-wide screen with the biggest text, the amount box under "Spent something?" on Today cuts off its "0.00" hint (it shows "0.0"). Seen Nov 9, 2026, in headless Chrome.
 
-- Restore checks, for the next release (found Nov 5, 2026, comparing with the shared kit in freeforgood-apps/toolkit): `readBackup()` and `sanitize()` already rebuild clean data from known fields only. Still missing: a size cap on pasted codes and backup files, and a friendly "this backup is from a newer version, update the app first" message (right now a newer backup would restore with its new parts quietly dropped).
+- Before the plan's data version (`DATA_V`) ever goes past 5: an older copy of the app (a tab left open, or after rolling back a release) still loads newer saved data and automatic copies, and would trim them to its own shape on its next save. Restoring already refuses newer backups (1.1.10). Loading saved data, the other-tab update and bringing back a copy should do the same, keeping the newer data untouched and asking to update. Seen Nov 10, 2026, while adding the restore checks.
 - Spanish version: built for 1.0 (561 phrases in US Spanish) and set aside. It needs the 1.1 text translated before it comes back.
 - Keep the saving safety net matching Study Coach (backups, automatic copies, two-tap restore, damaged data set aside, reminders). Study Coach 2.5 copied it from here.
 
@@ -52,6 +53,8 @@ Why some things are the way they are, so nobody "fixes" them by mistake:
 - **Text boxes use 16px text or more,** or iPhone zooms in when they're tapped.
 - **Date boxes use `appearance: none`.** Otherwise iPhone draws them wider than their card and centers the date. The self-test checks that every box fits inside its card.
 - **Everything directly inside a sheet or the calculator has `flex-shrink: 0`.** They scroll as flex columns, and without it a button with `min-height` gets squashed to 44px and its wrapped words spill out (the Delete button in About, 1.1.7).
+- **Restore turns away backups from a newer version** (1.1.10) instead of trimming them, because trimming would quietly lose whatever the newer version added. "Newer" means a plan `v` above `DATA_V`, a backup `format` above `BK_FORMAT`, or a password lock `v` above 1. Older backups, including ones from before backups had a wrapper, still restore; the self-test checks one.
+- **The 5 MB restore cap** (`BK_MAX`, 1.1.10) matches the shared kit and the file limit Till Payday already had. A plan with every list full and the longest allowed text makes a password backup code of about 860 KB, so no real backup comes close.
 - **The Claude copies are retired** (1.1.8), because republishing and checking them on every release cost Claude usage for little gain: the website does more (file backups, offline, Home Screen). `movedCard` shows only when `WEB` is false, so the website never shows it.
 
 ## How updates work

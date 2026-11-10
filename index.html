@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-YxU+rMDHrcwx2Xn48xkWKrLfraunvV7S9bZWvkEh8MM='; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src 'none'; manifest-src 'self'; worker-src 'self'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-src 'none'; media-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-o/MwRz9PZFqm+F3jhLmDGOn4gOj35S15nLZFr3pFZCk='; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src 'none'; manifest-src 'self'; worker-src 'self'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-src 'none'; media-src 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="description" content="A free paycheck planner. Make each check last till payday, and save a little every time.">
 <meta name="theme-color" content="#EDF2F0" media="(prefers-color-scheme: light)">
@@ -1240,7 +1240,7 @@ html.locked body { overflow: hidden; }
   // The build swaps these two for the GitHub Pages copy (its own storage key, offline support)
   const LOCAL_KEY = "till-payday-v1";
   const WEB = true;
-  const APP_VERSION = "1.1.9";
+  const APP_VERSION = "1.1.10";
   const SITE = "https://freeforgood-apps.github.io/till-payday/";
   const FEEDBACK_EMAIL = "freeforgood-apps+payday@proton.me";
   document.documentElement.lang = "en";
@@ -1426,11 +1426,13 @@ html.locked body { overflow: hidden; }
   }
 
   // ---- state ----
+  // The saved plan's shape. Raise it (with an upgrade step in sanitize) when that shape changes, so older versions know a plan is newer than they are.
+  const DATA_V = 5;
   function defaults() {
     const now = today();
     const t = isoOf(now);
     return {
-      v: 5, example: true, paid: {}, periodPay: {}, marks: {}, wait: [], skipped: { n: 0, amt: 0 },
+      v: DATA_V, example: true, paid: {}, periodPay: {}, marks: {}, wait: [], skipped: { n: 0, amt: 0 },
       backup: { at: "", n: 0, snooze: "" },
       spends: [
         { id: "x1", d: t, amt: 12.5, note: "Food", ex: true },
@@ -1547,7 +1549,7 @@ html.locked body { overflow: hidden; }
     const seenDebt = new Set();
     for (const x of debts) { while (seenDebt.has(x.id)) x.id = rid(); seenDebt.add(x.id); }
     return {
-      v: 5,
+      v: DATA_V,
       example,
       lastPayday: parseDate(o.lastPayday) ? o.lastPayday : d.lastPayday,
       pay: { every, days },
@@ -3972,6 +3974,9 @@ html.locked body { overflow: hidden; }
 
   // A backup is the plan as JSON: a file, or the same text as a copyable code
   const BK_PREFIX = "TILLPAY1:";
+  const BK_FORMAT = 2;   // newest backup wrapper this version reads: 1 plain, 2 with a password
+  const BK_MAX = 5e6;    // the most a pasted code or file can be (the shared kit's cap). The biggest real plan is far smaller.
+  const NEWER_MSG = "This backup is from a newer Till Payday. Close the app, open it again while online to update, then restore.";
   const backupJSON = () => JSON.stringify({ app: "Till Payday", format: 1, saved: isoOf(today()), plan: state });
   function toB64(str) {
     const bytes = new TextEncoder().encode(str);
@@ -4014,9 +4019,12 @@ html.locked body { overflow: hidden; }
     toast("Type a password of at least 6 characters, or turn the password off.");
     return false;
   }
-  // A plan, { locked } for a password-protected backup, or null
+  const isPlan = (p) => !!(p && typeof p === "object" && Array.isArray(p.incomes) && Array.isArray(p.bills));
+  const tooNew = (p) => Number(p && p.v) > DATA_V;   // restoring it here would quietly drop the parts this version doesn't know
+  // A plan, { locked } for a password-protected backup, { newer } for one from a newer Till Payday, { big } for one too big to be real, or null
   function readBackup(text) {
     let t = String(text || "").trim(), obj = null;
+    if (t.length > BK_MAX) return { big: true };
     try {
       if (t.startsWith("{")) obj = JSON.parse(t);
       else {
@@ -4025,11 +4033,14 @@ html.locked body { overflow: hidden; }
         obj = JSON.parse(fromB64(t));
       }
     } catch (e) { return null; }
-    if (obj && typeof obj === "object" && obj.encrypted && typeof obj.encrypted === "object" && obj.encrypted.data) return { locked: obj.encrypted };
-    const plan = obj && typeof obj === "object" && obj.plan && typeof obj.plan === "object" ? obj.plan : obj;
-    return plan && Array.isArray(plan.incomes) && Array.isArray(plan.bills) ? plan : null;
+    if (!obj || typeof obj !== "object") return null;
+    const ours = obj.app === "Till Payday";
+    if (ours && Number(obj.format) > BK_FORMAT) return { newer: true };
+    if (obj.encrypted && typeof obj.encrypted === "object" && obj.encrypted.data) return Number(obj.encrypted.v) > 1 ? { newer: true } : { locked: obj.encrypted };
+    const plan = obj.plan && typeof obj.plan === "object" ? obj.plan : obj;
+    if (tooNew(plan) && (ours || isPlan(plan))) return { newer: true };
+    return isPlan(plan) ? plan : null;
   }
-  const isPlan = (p) => !!(p && typeof p === "object" && Array.isArray(p.incomes) && Array.isArray(p.bills));
   function renderLockedNote() {
     const r = readBackup($("bkPaste").value);
     const locked = !!(r && r.locked);
@@ -4132,11 +4143,12 @@ html.locked body { overflow: hidden; }
     const f = e.target.files && e.target.files[0];
     e.target.value = "";
     if (!f) return;
-    if (f.size > 5e6) { toast("That file is too big to be a Till Payday backup."); return; }
+    if (f.size > BK_MAX) { toast("That file is too big to be a Till Payday backup."); return; }
     const r = new FileReader();
     r.onload = () => {
       const got = readBackup(r.result);
-      if (!got) { toast("That file isn't a Till Payday backup."); return; }
+      if (got && got.newer) { toast(NEWER_MSG); return; }
+      if (!got || got.big) { toast("That file isn't a Till Payday backup."); return; }
       $("bkPaste").value = String(r.result);
       resetRestore();
       renderLockedNote();
@@ -4151,7 +4163,13 @@ html.locked body { overflow: hidden; }
   $("bkPaste").addEventListener("input", () => { resetRestore(); renderLockedNote(); });
   $("bkRestore").addEventListener("click", async () => {
     const got = readBackup($("bkPaste").value);
-    if (!got) { $("bkPaste").focus(); toast($("bkPaste").value.trim() ? "That doesn't look like a Till Payday backup. Check you copied all of it." : "Choose a backup file or paste a code first."); return; }
+    if (!got || got.big || got.newer) {
+      $("bkPaste").focus();
+      toast(got && got.newer ? NEWER_MSG
+        : got ? "That's too big to be a Till Payday backup. Check you pasted only the backup code."
+        : $("bkPaste").value.trim() ? "That doesn't look like a Till Payday backup. Check you copied all of it." : "Choose a backup file or paste a code first.");
+      return;
+    }
     if (got.locked && !$("bkRestorePass").value) { renderLockedNote(); $("bkRestorePass").focus(); toast("This backup has a password. Type it first."); return; }
     if (!restoreArmed && !state.example && !damaged) {
       $("bkRestore").textContent = "Tap again to replace your plan";
@@ -4164,6 +4182,7 @@ html.locked body { overflow: hidden; }
     if (got.locked) {
       try { plan = JSON.parse(await unlockText(got.locked, $("bkRestorePass").value)); }
       catch (e) { $("bkRestorePass").select(); toast(canCrypt() ? "That password doesn't open this backup." : "This browser can't open password-protected backups."); return; }
+      if (tooNew(plan)) { toast(NEWER_MSG); return; }
       if (!isPlan(plan)) { toast("That backup couldn't be read."); return; }
     }
     $("bkPaste").value = ""; $("bkRestorePass").value = "";

@@ -1,5 +1,12 @@
 # Till Payday: changelog
 
+## 1.1.10 (Nov 10, 2026)
+- Safer restoring: if a backup was made by a newer version of Till Payday, it now says so and asks you to update first (close the app and open it again while online). Before, it would have restored without the parts this version doesn't know about. Nothing changes until you restore again.
+- Safer restoring: a pasted backup code over 5 MB is turned away, the same limit backup files already had. The biggest real plan makes a code under 1 MB.
+- Older backups restore the same as before. Your plan isn't affected.
+- The self-test now checks all of this: codes and files that are too big, backups (plain and with a password) from a newer version, a normal backup file, and a backup from before 1.1.
+- Tested: the toolkit's release check passed every line: versions agree, the privacy lock is up to date on both pages, the self-test passed in headless Chrome at three sizes (326 checks each, up from 286), the accessibility checker found nothing at 4 sizes in light and dark mode, and the security patterns found nothing since 1.1.9. Seven bugs planted on purpose in the new checks were each caught by the self-test. A plan with every list full and the longest allowed text makes a password backup code of 860 KB, and it still restores. The update message fits a 320px screen at the biggest text size in light and dark mode, and it's read aloud like the other messages. The old address's moving page makes the same kind of backup code that the self-test restores. Still to do: the self-test on the live site on a real iPhone.
+
 ## 1.1.9 (Nov 10, 2026)
 - Security: added a SECURITY.md (how to report a problem privately) and a .gitignore, from the shared Baseline kit.
 - Nothing else changed. Your plan isn't affected.
