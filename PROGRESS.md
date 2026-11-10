@@ -28,7 +28,7 @@ A free paycheck planner for real budgets: one job or two, any pay schedule. It s
 
 ## Next up
 
-- Small: on a 320px-wide screen with the biggest text, the amount box under "Spent something?" on Today cuts off its "0.00" hint (it shows "0.0"). Seen Nov 9, 2026, in headless Chrome.
+- Small: on a 320px-wide screen with the biggest text, the amount box under "Spent something?" on Today cuts off its "0.00" hint (it shows "0.0"). Seen Nov 9, 2026, in headless Chrome, and still there in 1.1.10 (the hint needs 84px, the box has 58px). The owner chose the fix: at the biggest text, stack the boxes, so the amount box gets its own full-width line with "What for?" below it, like other fields already do at that size.
 
 - Before the plan's data version (`DATA_V`) ever goes past 5: an older copy of the app (a tab left open, or after rolling back a release) still loads newer saved data and automatic copies, and would trim them to its own shape on its next save. Restoring already refuses newer backups (1.1.10). Loading saved data, the other-tab update and bringing back a copy should do the same, keeping the newer data untouched and asking to update. Seen Nov 10, 2026, while adding the restore checks.
 - Spanish version: built for 1.0 (561 phrases in US Spanish) and set aside. It needs the 1.1 text translated before it comes back.
