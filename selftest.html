@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Ic01BlxToZgogBl+iFgLLgaC2JOOiYH1NOXk2I0DcQQ=' 'sha256-ra1kgLmcPTwEcKzNXfBdqy5akPXTpFXsS82iPe5/STE='; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src 'none'; manifest-src 'self'; worker-src 'self'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-src 'none'; media-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-vm/e4p8yL8O39wj3fCrY+ujF4lM0PxHj4OZiRH94ygM=' 'sha256-HhHllby9PYrifAlf7i9RtG9DkX13SLlhIMDTU6VQG64='; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src 'none'; manifest-src 'self'; worker-src 'self'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-src 'none'; media-src 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="description" content="A free paycheck planner. Make each check last till payday, and save a little every time.">
 <meta name="theme-color" content="#EDF2F0" media="(prefers-color-scheme: light)">
@@ -297,6 +297,8 @@ details.more[open] summary::after { content: " ⌄"; }
 /* Spend logging */
 .logrow { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 8px; }
 .logrow.end { grid-template-columns: minmax(0, 1fr) auto auto; }
+/* At the biggest text (and on small phones, below) the amount gets its own line, so its "0.00" hint fits. The self-test checks it. */
+html[data-size="xl"] .logrow:not(.end) { grid-template-columns: minmax(0, 1fr); }
 .iconbtn { appearance: none; display: inline-grid; place-items: center; padding: 0; border: 1px solid var(--line); background: var(--surface); color: var(--accent); min-width: 44px; min-height: 44px; border-radius: 10px; cursor: pointer; }
 .iconbtn:hover { border-color: var(--accent); }
 .qchips { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -541,6 +543,7 @@ html.locked body { overflow: hidden; }
   html[data-size] .tab { font-size: 0.75rem; }
   .pot { grid-template-columns: minmax(0, 1fr); gap: 6px; }
   .setup .fields > div { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .logrow:not(.end) { grid-template-columns: minmax(0, 1fr); }
   .row { grid-template-areas: "name name del" "amt freq freq" "due due due"; }
   .row.income { grid-template-areas: "name name del" "amt freq freq"; }
   .row.save { grid-template-areas: "name name del" "amt freq freq" "sw sw sw"; }
@@ -1240,7 +1243,7 @@ html.locked body { overflow: hidden; }
   // The build swaps these two for the GitHub Pages copy (its own storage key, offline support)
   const LOCAL_KEY = "till-payday-selftest-v1";
   const WEB = true;
-  const APP_VERSION = "1.1.10";
+  const APP_VERSION = "1.1.11";
   const SITE = "https://freeforgood-apps.github.io/till-payday/";
   const FEEDBACK_EMAIL = "freeforgood-apps+payday@proton.me";
   document.documentElement.lang = "en";
@@ -4575,7 +4578,7 @@ html.locked body { overflow: hidden; }
   const KEY = "till-payday-selftest-v1";
   const REAL_KEY = "till-payday-v1";
   const WEBSITE = true;
-  const VERSION = "1.1.10";
+  const VERSION = "1.1.11";
   const EMAIL = "freeforgood-apps+payday@proton.me";
   const $ = (id) => document.getElementById(id);
   const q = (sel) => document.querySelector(sel);
@@ -4841,6 +4844,19 @@ html.locked body { overflow: hidden; }
       await step("Logging spending");
       tab("today");
       expect("Spending money", text("perBudget"), money0(budget));
+      // The amount box shows its whole "0.00" hint at every text size (small phones cut it off before 1.1.11).
+      // Three taps on the text size button go through all three sizes and back to where it started.
+      if (document.fonts) await document.fonts.ready;
+      for (let i = 0; i < 3; i++) {
+        const a = $("logAmt");
+        if (!a) { fail("Missing the spending box"); break; }
+        const cs = getComputedStyle(a), c = document.createElement("canvas").getContext("2d");
+        c.font = [cs.fontStyle, cs.fontWeight, cs.fontSize, cs.fontFamily].join(" ");
+        const need = Math.ceil(c.measureText(a.placeholder).width), room = Math.floor(a.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight));
+        const size = ($("sizeBtn").getAttribute("aria-label").match(/: (.*?)\./) || [0, "this"])[1];
+        ok("The spending box cuts off its “" + a.placeholder + "” hint at " + size + " text (needs " + need + "px, has " + room + "px)", need <= room + 1);
+        click($("sizeBtn")); await wait(30);
+      }
       set($("logAmt"), "12.50"); click(q('.qchip[data-note="Food"]')); click($("logAdd"));
       set($("logAmt"), "20+5"); set($("logNote"), "Fun"); click($("logAdd"));
       expect("Spent so far", text("perSpent"), "$37.50");

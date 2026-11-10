@@ -4,4 +4,4 @@ Found a problem? Please report it privately with the "Report a vulnerability" bu
 
 This app keeps your data on your device and doesn't send it anywhere.
 
-Last checked: 2026-11-10 (version 1.1.10)
+Last checked: 2026-11-10 (version 1.1.11)
