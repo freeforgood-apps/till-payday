@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-RiM/O5O2E2SWfiQTWomGed0arCaE/fPgD/CiQ5sRiLo=' 'sha256-1xnpkc+VqNqrdjVO57vsLwNQqNYzoRda/eiL4VN9VrA='; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src 'none'; manifest-src 'self'; worker-src 'self'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-src 'none'; media-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-kDF8ihw/jMmwqy2zHZrQC2cQrSPUFRoZyhp/gVStYc0=' 'sha256-EGuKXUODL6WIHzMgaGHs3zv5HVlgckWR1X5u7X59uOo='; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src 'none'; manifest-src 'self'; worker-src 'self'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-src 'none'; media-src 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="description" content="A free paycheck planner. Make each check last till payday, and save a little every time.">
 <meta name="theme-color" content="#EDF2F0" media="(prefers-color-scheme: light)">
@@ -466,7 +466,7 @@ html[data-size="xl"] .field.wide { grid-template-columns: minmax(0, 1fr); }
 label.ghost { display: block; }
 /* The file input is hidden, so its keyboard focus shows on the button-style label in front of it */
 label.ghost:has(+ .filepick:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
-/* PIN and password boxes in sheets: a visible label above each box */
+/* PIN, password and backup code boxes in sheets: a visible label above each box */
 .pwfield { display: flex; flex-direction: column; gap: 6px; }
 .pwfield label { font-size: 0.9375rem; font-weight: 700; }
 .pwfield small { display: block; font-weight: 400; color: var(--muted); font-size: 0.8125rem; margin-top: 2px; }
@@ -601,6 +601,17 @@ html.locked body { overflow: hidden; }
       </div>
     </div>
 
+    <!-- Above the example-numbers card, which also shows when saved numbers can't be read, so this is seen first -->
+    <div class="result nudge overdue" id="damagedCard" hidden>
+      <p class="result-title">Couldn't read your saved numbers</p>
+      <p class="headline">Your plan is set aside, not lost</p>
+      <p class="foot">Something damaged the copy saved on this device, so Till Payday kept it aside instead of saving over it. Restore one of the automatic copies or a backup, or start fresh.</p>
+      <div class="actions">
+        <button class="primary" type="button" id="damagedRestore">See saved copies</button>
+        <button class="ghost" type="button" id="damagedFresh">Start fresh</button>
+      </div>
+    </div>
+
     <div class="result setup" id="setupCard">
       <p class="result-title">Make it yours</p>
       <p class="headline">These are example numbers.</p>
@@ -628,16 +639,6 @@ html.locked body { overflow: hidden; }
       <p class="headline">Your changes aren't being saved here</p>
       <p class="foot" id="saveWarnText">This can happen in a private browsing window, or when the phone's storage is full. Save a backup now so you don't lose what you've typed.</p>
       <div class="actions"><button class="primary" type="button" id="saveWarnGo">Back up now</button></div>
-    </div>
-
-    <div class="result nudge overdue" id="damagedCard" hidden>
-      <p class="result-title">Couldn't read your saved numbers</p>
-      <p class="headline">Your plan is set aside, not lost</p>
-      <p class="foot">Something damaged the copy saved on this device, so Till Payday kept it aside instead of saving over it. Restore one of the automatic copies or a backup, or start fresh.</p>
-      <div class="actions">
-        <button class="primary" type="button" id="damagedRestore">See saved copies</button>
-        <button class="ghost" type="button" id="damagedFresh">Start fresh</button>
-      </div>
     </div>
 
     <div class="result nudge overdue" id="newerCard" hidden>
@@ -1116,7 +1117,10 @@ html.locked body { overflow: hidden; }
   <p class="foot">On a new phone, or if your numbers ever go missing. This replaces the plan that's here now.</p>
   <label class="ghost" for="bkPick">Choose a backup file</label>
   <input type="file" id="bkPick" class="filepick" accept=".json,.txt,application/json,text/plain">
-  <textarea id="bkPaste" placeholder="Or paste a backup code here" aria-label="Backup code to restore" autocomplete="off" spellcheck="false"></textarea>
+  <div class="pwfield">
+    <label for="bkPaste">Or paste a backup code</label>
+    <textarea id="bkPaste" autocomplete="off" spellcheck="false"></textarea>
+  </div>
   <p class="foot" id="bkLockedNote" hidden>This backup has a password. Type it below, then tap Restore.</p>
   <div class="pwfield" id="bkRestorePassBox" hidden>
     <label for="bkRestorePass">This backup's password</label>
@@ -1247,7 +1251,7 @@ html.locked body { overflow: hidden; }
   // The build swaps these two for the GitHub Pages copy (its own storage key, offline support)
   const LOCAL_KEY = "till-payday-selftest-v1";
   const WEB = true;
-  const APP_VERSION = "1.1.12";
+  const APP_VERSION = "1.1.13";
   const SITE = "https://freeforgood-apps.github.io/till-payday/";
   const FEEDBACK_EMAIL = "freeforgood-apps+payday@proton.me";
   document.documentElement.lang = "en";
@@ -4596,7 +4600,7 @@ html.locked body { overflow: hidden; }
     mode = "local";
     loadLocal();
     loaded = true;
-    if (newer) showTab("today");   // where the update card is
+    if (newer || damaged) showTab("today");   // where the update card and the damaged card are
     status(newer ? NEWER_STATUS : state.example ? "Changes save on this device" : "Saved on this device");
     renderResults();
     flushPending();
@@ -4616,7 +4620,7 @@ html.locked body { overflow: hidden; }
   const KEY = "till-payday-selftest-v1";
   const REAL_KEY = "till-payday-v1";
   const WEBSITE = true;
-  const VERSION = "1.1.12";
+  const VERSION = "1.1.13";
   const EMAIL = "freeforgood-apps+payday@proton.me";
   const $ = (id) => document.getElementById(id);
   const q = (sel) => document.querySelector(sel);
@@ -5096,7 +5100,11 @@ html.locked body { overflow: hidden; }
       tab("split"); click($("startOver")); click($("startOver"));
       ok("Erase my numbers", shown("setupCard"));
       openSheet("backup");
-      set($("bkPaste"), code); click($("bkRestore"));
+      set($("bkPaste"), code);
+      // The backup code box keeps a label you can see once a code is pasted, read with the same words (WCAG 3.3.2, 2.5.3). Before 1.1.13 it had only a gray hint.
+      const pasteName = $("bkPaste").getAttribute("aria-label") || ($("bkPaste").labels && $("bkPaste").labels[0] ? $("bkPaste").labels[0].textContent : "");
+      ok("The backup code box has a label you can see, read with the same words", labelShown("bkPaste") && /^or paste a backup code\b/i.test(pasteName.trim()));
+      click($("bkRestore"));
       flush();
       s = saved();
       ok("Backup restores exactly", !!(s && before && JSON.stringify(s.incomes) === JSON.stringify(before.incomes) && JSON.stringify(s.bills) === JSON.stringify(before.bills) && s.spends.length === before.spends.length && JSON.stringify(s.debts) === JSON.stringify(before.debts)));
