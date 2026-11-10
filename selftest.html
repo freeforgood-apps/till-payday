@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-vm/e4p8yL8O39wj3fCrY+ujF4lM0PxHj4OZiRH94ygM=' 'sha256-HhHllby9PYrifAlf7i9RtG9DkX13SLlhIMDTU6VQG64='; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src 'none'; manifest-src 'self'; worker-src 'self'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-src 'none'; media-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-RiM/O5O2E2SWfiQTWomGed0arCaE/fPgD/CiQ5sRiLo=' 'sha256-1xnpkc+VqNqrdjVO57vsLwNQqNYzoRda/eiL4VN9VrA='; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src 'none'; manifest-src 'self'; worker-src 'self'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-src 'none'; media-src 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="description" content="A free paycheck planner. Make each check last till payday, and save a little every time.">
 <meta name="theme-color" content="#EDF2F0" media="(prefers-color-scheme: light)">
@@ -295,10 +295,9 @@ details.more[open] summary::after { content: " ⌄"; }
 .bd-row .v { font-family: var(--f-num); font-variant-numeric: tabular-nums; }
 
 /* Spend logging */
-.logrow { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 8px; }
-.logrow.end { grid-template-columns: minmax(0, 1fr) auto auto; }
-/* At the biggest text (and on small phones, below) the amount gets its own line, so its "0.00" hint fits. The self-test checks it. */
-html[data-size="xl"] .logrow:not(.end) { grid-template-columns: minmax(0, 1fr); }
+/* The amount and "What for?" each get their own line, so the amount's "0.00" hint always fits and "What for?" keeps a label you can see. The self-test checks both. */
+.lognote { margin-top: 4px; }
+.logrow { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 8px; }
 .iconbtn { appearance: none; display: inline-grid; place-items: center; padding: 0; border: 1px solid var(--line); background: var(--surface); color: var(--accent); min-width: 44px; min-height: 44px; border-radius: 10px; cursor: pointer; }
 .iconbtn:hover { border-color: var(--accent); }
 .qchips { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -543,7 +542,6 @@ html.locked body { overflow: hidden; }
   html[data-size] .tab { font-size: 0.75rem; }
   .pot { grid-template-columns: minmax(0, 1fr); gap: 6px; }
   .setup .fields > div { grid-template-columns: minmax(0, 1fr); gap: 6px; }
-  .logrow:not(.end) { grid-template-columns: minmax(0, 1fr); }
   .row { grid-template-areas: "name name del" "amt freq freq" "due due due"; }
   .row.income { grid-template-areas: "name name del" "amt freq freq"; }
   .row.save { grid-template-areas: "name name del" "amt freq freq" "sw sw sw"; }
@@ -642,6 +640,13 @@ html.locked body { overflow: hidden; }
       </div>
     </div>
 
+    <div class="result nudge overdue" id="newerCard" hidden>
+      <p class="result-title">Saved by a newer Till Payday</p>
+      <p class="headline">Update to keep saving</p>
+      <p class="foot">Your plan was saved by a newer version of Till Payday, so this older one won't save over it. Your numbers show here, but changes won't be saved until you update. Tap Update now while you're online.</p>
+      <div class="actions"><button class="primary" type="button" id="newerUpdate">Update now</button></div>
+    </div>
+
     <div class="result nudge" id="newCard" hidden>
       <p class="result-title">New in Till Payday 1.1</p>
       <ul class="newlist">
@@ -707,17 +712,16 @@ html.locked body { overflow: hidden; }
     <form class="group" id="logForm" novalidate>
       <div class="field stack">
         <label for="logAmt">Spent something?</label>
-        <div class="logrow">
-          <div class="money big"><input id="logAmt" type="text" inputmode="decimal" placeholder="0.00" autocomplete="off"></div>
-          <input id="logNote" type="text" placeholder="What for?" autocomplete="off" maxlength="40" aria-label="What it was for">
-        </div>
+        <div class="money big"><input id="logAmt" type="text" inputmode="decimal" placeholder="0.00" autocomplete="off"></div>
+        <label for="logNote" class="lognote">What for?<small>Optional</small></label>
+        <input id="logNote" type="text" autocomplete="off" maxlength="40">
         <div class="qchips" role="group" aria-label="Quick labels">
           <button type="button" class="qchip" data-note="Food" aria-pressed="false">Food</button>
           <button type="button" class="qchip" data-note="Gas or bus" aria-pressed="false">Gas or bus</button>
           <button type="button" class="qchip" data-note="Household" aria-pressed="false">Household</button>
           <button type="button" class="qchip" data-note="Fun" aria-pressed="false">Fun</button>
         </div>
-        <div class="logrow end">
+        <div class="logrow">
           <select id="logWhen" aria-label="When">
             <option value="0">Today</option>
             <option value="1">Yesterday</option>
@@ -1243,7 +1247,7 @@ html.locked body { overflow: hidden; }
   // The build swaps these two for the GitHub Pages copy (its own storage key, offline support)
   const LOCAL_KEY = "till-payday-selftest-v1";
   const WEB = true;
-  const APP_VERSION = "1.1.11";
+  const APP_VERSION = "1.1.12";
   const SITE = "https://freeforgood-apps.github.io/till-payday/";
   const FEEDBACK_EMAIL = "freeforgood-apps+payday@proton.me";
   document.documentElement.lang = "en";
@@ -2533,7 +2537,7 @@ html.locked body { overflow: hidden; }
   // ---- Delete everything: the plan, automatic copies, PIN and settings ----
   function wipeDevice() {
     clearTimeout(saveTimer); saveTimer = null;
-    damaged = false; holdSave = false; pinCfg = null; newSeen = true;
+    damaged = false; holdSave = false; newer = false; pinCfg = null; newSeen = true;
     state = defaults();
     unlock();
     renderAll();
@@ -3885,9 +3889,9 @@ html.locked body { overflow: hidden; }
   try { installHidden = localStorage.getItem(LOCAL_KEY + "-install") === "done"; } catch (e) {}
   function renderBackupBits(P) {
     const bk = backupNeed(P);
-    // Header: in place of "Saved", how long since the last backup
+    // Header: in place of "Saved", how long since the last backup (but never in place of a note that saving has stopped)
     const line = $("backupStatus");
-    const showLine = !!bk && !localFailed;
+    const showLine = !!bk && !localFailed && !newer;
     line.hidden = !showLine;
     $("status").hidden = showLine;
     if (showLine) {
@@ -3931,6 +3935,8 @@ html.locked body { overflow: hidden; }
   $("backupStatus").addEventListener("click", (e) => showSheet("backupSheet", e.currentTarget));
   $("saveWarnGo").addEventListener("click", (e) => showSheet("backupSheet", e.currentTarget));
   $("damagedRestore").addEventListener("click", (e) => { showSheet("backupSheet", e.currentTarget); $("bkCopiesBox").scrollIntoView({ block: "start" }); });
+  // A reload gets the newest version when online (the offline helper asks the network first for the page)
+  $("newerUpdate").addEventListener("click", () => location.reload());
   $("damagedFresh").addEventListener("click", () => {
     damaged = false; holdSave = false;
     state = defaults();
@@ -3980,6 +3986,7 @@ html.locked body { overflow: hidden; }
   const BK_FORMAT = 2;   // newest backup wrapper this version reads: 1 plain, 2 with a password
   const BK_MAX = 5e6;    // the most a pasted code or file can be (the shared kit's cap). The biggest real plan is far smaller.
   const NEWER_MSG = "This backup is from a newer Till Payday. Close the app, open it again while online to update, then restore.";
+  const NEWER_COPY_MSG = "This copy is from a newer Till Payday. Close the app, open it again while online to update, then bring it back.";
   const backupJSON = () => JSON.stringify({ app: "Till Payday", format: 1, saved: isoOf(today()), plan: state });
   function toB64(str) {
     const bytes = new TextEncoder().encode(str);
@@ -4093,6 +4100,10 @@ html.locked body { overflow: hidden; }
     if (!b) return;
     const c = readCopies()[Number(b.dataset.copy)];
     if (!c) return;
+    let plan = null;
+    try { plan = JSON.parse(c.plan); } catch (err) {}
+    if (tooNew(plan)) { toast(NEWER_COPY_MSG); return; }
+    if (!isPlan(plan)) { toast("That copy couldn't be read."); return; }
     if (copyArmed !== b.dataset.copy && !state.example && !damaged) {
       copyArmed = b.dataset.copy;
       b.firstChild.textContent = "Tap again to bring back this copy";
@@ -4100,9 +4111,6 @@ html.locked body { overflow: hidden; }
       return;
     }
     copyArmed = null;
-    let plan = null;
-    try { plan = JSON.parse(c.plan); } catch (err) {}
-    if (!isPlan(plan)) { toast("That copy couldn't be read."); return; }
     applyRestore(plan, "Copy from " + fmtDate(parseDate(c.day)) + " restored.", false);
   });
   $("bkFile").addEventListener("click", async () => {
@@ -4192,14 +4200,28 @@ html.locked body { overflow: hidden; }
     renderLockedNote();
     applyRestore(plan, "Plan restored.");
   });
+  // Restoring over a plan from a newer Till Payday: Undo puts that plan back exactly as it was saved, never trimmed
+  function undoOverNewer() {
+    let held = null, obj = null;
+    try { held = localStorage.getItem(LOCAL_KEY); obj = JSON.parse(held); } catch (e) {}
+    if (!obj || typeof obj !== "object") return snapshotForUndo();
+    return () => {
+      clearTimeout(saveTimer); saveTimer = null;
+      try { localStorage.setItem(LOCAL_KEY, held); } catch (e) {}
+      useSaved(obj);
+      settleAuto();
+      renderAll();
+      status(NEWER_STATUS);
+    };
+  }
   // isBackup is false for an automatic copy: it's still only on this device, so it keeps its own backup record and reminders keep counting (same as Study Coach)
   function applyRestore(plan, msg, isBackup = true) {
-    const undo = snapshotForUndo();
+    const undo = newer ? undoOverNewer() : snapshotForUndo();
     state = sanitize(plan);
     migratedOnLoad = false;
     settleAuto();
     if (isBackup) state.backup = { at: isoOf(today()), n: 0, snooze: "" };
-    damaged = false; holdSave = false;
+    damaged = false; holdSave = false; newer = false;
     renderAll();
     scheduleSave();
     hideSheet();
@@ -4374,6 +4396,14 @@ html.locked body { overflow: hidden; }
 
   // Saved numbers that can't be read are set aside, never saved over
   let damaged = false, holdSave = false;
+  // Saved numbers from a newer Till Payday (a tab left open over an update, or after a rollback) show here but are never saved over,
+  // so nothing the newer version added gets trimmed. The same as restoring a newer backup (1.1.10).
+  let newer = false;
+  const NEWER_STATUS = "Not saving until Till Payday updates";
+  function useSaved(obj) {
+    newer = tooNew(obj);
+    state = sanitize(obj);
+  }
   function loadLocal() {
     let raw = null;
     try { raw = localStorage.getItem(LOCAL_KEY); } catch (e) { return; }
@@ -4381,7 +4411,7 @@ html.locked body { overflow: hidden; }
     try {
       const obj = JSON.parse(raw);
       if (!obj || typeof obj !== "object") throw new Error("not a plan");
-      state = sanitize(obj);
+      useSaved(obj);
       afterLoad();
       renderAll();
       keepDailyCopy(raw);
@@ -4393,6 +4423,7 @@ html.locked body { overflow: hidden; }
   }
   let localFailed = false;
   function saveLocal() {
+    if (newer) { status(NEWER_STATUS); return; }
     if (holdSave) { status("Not saving until you choose a copy"); return; }
     const json = JSON.stringify(state);
     let ok = false;
@@ -4406,6 +4437,7 @@ html.locked body { overflow: hidden; }
   function renderSaveWarn() {
     $("saveWarn").hidden = !(mode === "local" && loaded && localFailed);
     $("damagedCard").hidden = !(mode === "local" && damaged);
+    $("newerCard").hidden = !(mode === "local" && newer);
   }
   // A copy from each of the last 3 days the plan was opened, kept on this device
   const COPIES = LOCAL_KEY + "-copies";
@@ -4447,9 +4479,14 @@ html.locked body { overflow: hidden; }
     if (e.key === LOCAL_KEY + "-pin") { readPin(); if (pinCfg && !locked) lockNow(); return; }
     if (e.key !== LOCAL_KEY && e.key !== null) return;
     clearTimeout(saveTimer); saveTimer = null;
-    if (e.newValue == null) { state = defaults(); renderAll(); return; }   // everything was deleted in the other tab
-    if (e.newValue === JSON.stringify(state)) return;
-    try { state = sanitize(JSON.parse(e.newValue)); migratedOnLoad = false; settleAuto(); renderAll(); } catch (err) {}
+    const was = newer;
+    if (e.newValue == null) { newer = false; state = defaults(); }   // everything was deleted in the other tab
+    else if (e.newValue === JSON.stringify(state)) return;
+    else {
+      try { const obj = JSON.parse(e.newValue); if (!obj || typeof obj !== "object") return; useSaved(obj); migratedOnLoad = false; settleAuto(); } catch (err) { return; }
+    }
+    renderAll();
+    if (newer || was) status(newer ? NEWER_STATUS : state.example ? "Changes save on this device" : "Saved on this device");
   });
   function scheduleSave() {
     if (!loaded) return;
@@ -4559,7 +4596,8 @@ html.locked body { overflow: hidden; }
     mode = "local";
     loadLocal();
     loaded = true;
-    status(state.example ? "Changes save on this device" : "Saved on this device");
+    if (newer) showTab("today");   // where the update card is
+    status(newer ? NEWER_STATUS : state.example ? "Changes save on this device" : "Saved on this device");
     renderResults();
     flushPending();
   }
@@ -4578,7 +4616,7 @@ html.locked body { overflow: hidden; }
   const KEY = "till-payday-selftest-v1";
   const REAL_KEY = "till-payday-v1";
   const WEBSITE = true;
-  const VERSION = "1.1.11";
+  const VERSION = "1.1.12";
   const EMAIL = "freeforgood-apps+payday@proton.me";
   const $ = (id) => document.getElementById(id);
   const q = (sel) => document.querySelector(sel);
@@ -4857,6 +4895,9 @@ html.locked body { overflow: hidden; }
         ok("The spending box cuts off its “" + a.placeholder + "” hint at " + size + " text (needs " + need + "px, has " + room + "px)", need <= room + 1);
         click($("sizeBtn")); await wait(30);
       }
+      // "What for?" keeps a label you can see while typing, read with the same words (WCAG 3.3.2, 2.5.3). Before 1.1.12 it had only a gray hint.
+      const noteName = $("logNote") ? ($("logNote").getAttribute("aria-label") || ($("logNote").labels && $("logNote").labels[0] ? $("logNote").labels[0].textContent : "")) : "";
+      ok("The “What for?” box has a label you can see, read with the same words", labelShown("logNote") && /^what for\b/i.test(noteName.trim()));
       set($("logAmt"), "12.50"); click(q('.qchip[data-note="Food"]')); click($("logAdd"));
       set($("logAmt"), "20+5"); set($("logNote"), "Fun"); click($("logAdd"));
       expect("Spent so far", text("perSpent"), "$37.50");
@@ -5188,6 +5229,16 @@ html.locked body { overflow: hidden; }
         flush();
         const s3 = saved();
         ok("A real backup still counts as one", !!s3 && s3.backup.at === dk(0) && s3.backup.n === 0 && JSON.stringify(s3.bills) === JSON.stringify(before.bills));
+        // A copy saved by a newer version is turned away on the first tap, like a newer backup (1.1.12)
+        const nc = JSON.parse(JSON.stringify(s3 || cur)); nc.v = (nc.v || 5) + 1; nc.later = { kept: true }; nc.bills = nc.bills.slice(0, 1);
+        localStorage.setItem(KEY + "-copies", JSON.stringify([{ day: dk(2), at: new Date(Date.now() - 2 * 86400000).toISOString(), plan: JSON.stringify(nc) }]));
+        const keep2 = localStorage.getItem(KEY);
+        openSheet("backup"); $("toastMsg").textContent = "";
+        const nb = q('#bkCopies [data-copy="0"]');
+        click(nb);
+        for (let i = 0; i < 30 && !/newer/.test(toastText()); i++) await wait(100);
+        flush();
+        ok("A copy from a newer version says to update first", /newer Till Payday.*update/.test(toastText()) && !!nb && !/Tap again/.test(nb.textContent) && localStorage.getItem(KEY) === keep2);
         localStorage.removeItem(KEY + "-copies");
         closeSheet();
       }
@@ -5207,6 +5258,33 @@ html.locked body { overflow: hidden; }
       const was = text("perSpent");
       window.dispatchEvent(new StorageEvent("storage", { key: KEY, newValue: JSON.stringify(other), oldValue: localStorage.getItem(KEY) }));
       ok("Follows a change from another tab", text("perSpent") !== was && qa("#logList li").some((li) => /Other tab/.test(li.textContent)));
+      // A newer Till Payday saves in another tab: this one shows it but never saves over it (1.1.12)
+      {
+        flush();
+        const mine = localStorage.getItem(KEY);
+        const np = JSON.parse(mine); np.v = (np.v || 5) + 1; np.later = { kept: true };
+        np.spends.push({ id: "newertab", d: iso(T), amt: 3, note: "Newer tab" });
+        const newerJson = JSON.stringify(np);
+        const fromTab = (v, old) => { localStorage.setItem(KEY, v); window.dispatchEvent(new StorageEvent("storage", { key: KEY, newValue: v, oldValue: old })); };
+        fromTab(newerJson, mine);
+        ok("A newer version's save in another tab shows the update card", shown("newerCard") && shown("newerUpdate"));
+        ok("Its numbers show here", qa("#logList li").some((li) => /Newer tab/.test(li.textContent)));
+        set($("logAmt"), "4"); click($("logAdd")); flush();
+        ok("This tab never saves over a newer version's plan, and says so at the top", localStorage.getItem(KEY) === newerJson && /Not saving until Till Payday updates/.test(text("status")) && shown("status"));
+        // Restoring a backup over it takes two taps, and Undo puts the newer plan back exactly as it was
+        openSheet("backup"); $("toastMsg").textContent = ""; set($("bkPaste"), code); click($("bkRestore"));
+        ok("Restoring over a newer version's plan asks for a second tap", localStorage.getItem(KEY) === newerJson && /Tap again/.test(text("bkRestore")));
+        click($("bkRestore"));
+        for (let i = 0; i < 60 && !/Plan restored/.test(toastText()); i++) await wait(100);
+        flush();
+        ok("…then replaces it", !shown("newerCard") && JSON.stringify((saved() || {}).bills) === JSON.stringify(before.bills));
+        click($("toastUndo")); flush();
+        ok("Undo puts the newer version's plan back untouched", localStorage.getItem(KEY) === newerJson && shown("newerCard"));
+        // Once the saved plan is from this version again, saving starts again
+        fromTab(mine, newerJson);
+        set($("logAmt"), "5"); click($("logAdd")); flush();
+        ok("When the plan is from this version again, the card goes and saving starts again", !shown("newerCard") && (saved() || { spends: [] }).spends.some((x) => x.amt === 5));
+      }
 
       // ---------- privacy lock ----------
       await step("Privacy lock");
