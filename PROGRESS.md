@@ -30,6 +30,7 @@ A free paycheck planner for real budgets: one job or two, any pay schedule. It s
 ## Next up
 
 - Before the plan's data version (`DATA_V`) ever goes past 5: an older copy of the app (a tab left open, or after rolling back a release) still loads newer saved data and automatic copies, and would trim them to its own shape on its next save. Restoring already refuses newer backups (1.1.10). Loading saved data, the other-tab update and bringing back a copy should do the same, keeping the newer data untouched and asking to update. Seen Nov 10, 2026, while adding the restore checks.
+- Small: the "What for?" box under "Spent something?" on Today (`logNote`) has only its gray hint as a visible label, so the label disappears once someone types (WCAG 3.3.2). VoiceOver reads it as "What it was for", which doesn't contain the words "What for" (WCAG 2.5.3). Seen Nov 10, 2026, during 1.1.11's accessibility check. The self-test's visible-label checks don't cover this box yet.
 - Spanish version: built for 1.0 (561 phrases in US Spanish) and set aside. It needs the 1.1 text translated before it comes back.
 - Keep the saving safety net matching Study Coach (backups, automatic copies, two-tap restore, damaged data set aside, reminders). Study Coach 2.5 copied it from here.
 
