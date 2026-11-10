@@ -3,7 +3,7 @@
 ## 1.1.9 (Nov 10, 2026)
 - Security: added a SECURITY.md (how to report a problem privately) and a .gitignore, from the shared Baseline kit.
 - Nothing else changed. Your plan isn't affected.
-- Tested: the toolkit's release check passed every line: versions agree, the privacy lock is up to date on both pages, the self-test passed in headless Chrome at three sizes (286 checks each), the accessibility checker found nothing at 4 sizes in light and dark mode, and the security patterns found nothing since 1.1.8. Still to do: the self-test on the live site on a real iPhone.
+- Tested: the toolkit's release check passed every line: versions agree, the privacy lock is up to date on both pages, the self-test passed in headless Chrome at three sizes (286 checks each), the accessibility checker found nothing at 4 sizes in light and dark mode, and the security patterns found nothing since 1.1.8. On the live site on a real iPhone (Safari engine, iOS 18.7), the self-test passed in a Safari tab (286 checks).
 
 ## 1.1.8 (Nov 9, 2026)
 - Claude copy only: the Till Payday page inside Claude now says Till Payday has moved to the website. It explains how to bring your plan along with a backup code, with a button that opens the backup code. This is the last update to the Claude copies, so the website is the one to use from now on. Plans saved in the Claude copy stay there and keep working.
