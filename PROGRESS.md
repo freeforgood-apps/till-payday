@@ -6,9 +6,10 @@ New chat? Read this first. It replaces the old Claude Project instructions. Then
 
 A free paycheck planner for real budgets: one job or two, any pay schedule. It splits each paycheck into bills, savings and spending money, counts down to payday, and helps people save and pay off debt. README.md lists the main features.
 
-## Where things stand (Nov 9, 2026)
+## Where things stand (Nov 10, 2026)
 
-- **Live version:** 1.1.8 (English) at https://freeforgood-apps.github.io/till-payday/
+- **Live version:** 1.1.9 (English) at https://freeforgood-apps.github.io/till-payday/
+- 1.1.9 (Nov 10, 2026: added SECURITY.md and .gitignore from the Baseline kit; the app itself is unchanged) passed the toolkit's release check: versions agree, privacy lock up to date, self-test in headless Chrome at three sizes (286 checks each), accessibility checker clean at 4 sizes in light and dark, no security pattern leads. **Still to do:** its self-test on the live site on a real iPhone.
 - 1.1.8 (Nov 9, 2026: the Claude copy now says Till Payday has moved to the website; the website is unchanged) and 1.1.7 (Nov 9, 2026: the red Delete button in About no longer gets squashed with its words spilling out, on small phones or with bigger text) passed their self-tests in headless Chrome at three sizes (286 checks each). On the live site on a real iPhone (Safari engine, iOS 18.7, Nov 9, 2026), 1.1.8's self-test passed in a Safari tab and from the Home Screen app (286 checks each), and the red Delete button in About looked right. Both reports said Safari hasn't promised to keep the data, which iPhone often doesn't; backup codes cover that.
 - **The Claude copies are retired** (Nov 9, 2026). Both were republished one last time on 1.1.8 and get no more updates. See "Where it lives".
 - 1.1.6 (Nov 5, 2026: iPhone date boxes no longer stick out of their card) passed its self-test in headless Chrome at three sizes (286 checks each). Its real-iPhone check is covered by 1.1.8's iPhone self-test (Nov 9, 2026), whose check that every box fits inside its card passed.
@@ -18,7 +19,7 @@ A free paycheck planner for real budgets: one job or two, any pay schedule. It s
 ## Where it lives
 
 - **This repo is the latest source.** Claude's workspace is temporary, so anything worth keeping gets saved here.
-- `index.html` is the whole app, `selftest.html` the self-test, and `sw.js` handles offline use (its version goes up with each release). Also README.md, manifest.webmanifest and the icons. Files sit flat at the top of the repo (no folders).
+- `index.html` is the whole app, `selftest.html` the self-test, and `sw.js` handles offline use (its version goes up with each release). Also README.md, manifest.webmanifest, the icons, `SECURITY.md` (how to report a problem privately; update its "Last checked" line after each security check) and `.gitignore` (both from the toolkit's Baseline kit). Files sit flat at the top of the repo (no folders).
 - **Version tags** are added automatically. `.github/workflows/tag-new-versions.yml` reads APP_VERSION from `index.html` on every push to main and adds the tag (like `v1.1.4`) if it doesn't exist yet. Claude's sessions can't push tags themselves, which is why it's done this way. Earlier versions (1.1.2 and before) have no tags.
 - **Claude copies (retired Nov 9, 2026):** two Claude pages, named "Till Payday" (saves to the Claude account) and "Till Payday Self-Test". Find them by name in the Claude artifacts list. Their links stay out of this repo. Both stay up on 1.1.8, which shows a "Till Payday has moved" note pointing to the website, with steps to bring a plan along by backup code. **Don't republish them on releases.** People's plans live in the app copy, so never delete it without asking. Only touch them again for a safety or data fix, using `artifact.html` and `selftest-artifact.html` from `rebuild.py`.
 - **Old address:** freestudycoach.github.io/till-payday holds only a "we've moved" page that forwards people here and helps anyone with a plan saved there bring it along. Never put the app back there. How it works is in how-to-update.md.

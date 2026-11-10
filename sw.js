@@ -1,5 +1,5 @@
-// Till Payday offline support (version 1.1.8)
-const CACHE = "till-payday-1.1.8";
+// Till Payday offline support (version 1.1.9)
+const CACHE = "till-payday-1.1.9";
 const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png", "./favicon-32.png"];
 
 self.addEventListener("install", (e) => {
