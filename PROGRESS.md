@@ -32,7 +32,6 @@ A free paycheck planner for real budgets: one job or two, any pay schedule. It s
 ## Next up
 
 - The self-test can't reload itself, so the load path (opening the app with a newer plan or damaged data saved, and which tab it opens on) is checked by a separate headless run at release time, not on the phone. The other-tab and copy paths share the same code and are in the self-test.
-- The toolkit's accessibility checker notes the hidden file input in the backup sheet (`bkPick`, 22×44) as a small tap target when the sheet is open. It's not a real target: people tap the full-width "Choose a backup file" label in front of it. Same in 1.1.12. A toolkit change (measure a file input's label, like it already does for checkboxes) would quiet it.
 - Spanish version: built for 1.0 (561 phrases in US Spanish) and set aside. It needs the 1.1 text translated before it comes back.
 - Keep the saving safety net matching Study Coach (backups, automatic copies, two-tap restore, damaged data set aside, reminders). Study Coach 2.5 copied it from here.
 
