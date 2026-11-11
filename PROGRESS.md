@@ -1,39 +1,10 @@
 # Till Payday: progress
 
-New chat? Read this first. It replaces the old Claude Project instructions. Then read how-to-update.md before editing anything.
+New chat? Read this first, then how-to-update.md before editing anything. It replaces the old Claude Project instructions. The steady brief comes first; the changing status is at the bottom, and every version's full test notes are in CHANGELOG.md.
 
 ## What it is
 
 A free paycheck planner for real budgets: one job or two, any pay schedule. It splits each paycheck into bills, savings and spending money, counts down to payday, and helps people save and pay off debt. README.md lists the main features.
-
-## Where things stand (Nov 10, 2026)
-
-- **Live version:** 1.1.13 (English) at https://freeforgood-apps.github.io/till-payday/
-- 1.1.13 (Nov 10, 2026: the backup code box gets its own visible label, "Or paste a backup code"; when saved numbers can't be read, the app opens on Today with the "Couldn't read your saved numbers" card at the top, above the example numbers) passed the toolkit's release check: versions agree, privacy lock up to date, self-test in headless Chrome at three sizes (355 checks each), accessibility checker clean at 4 sizes in light and dark (axe also clean with the damaged card showing and with the backup sheet open). A separate headless check of the load path (80 checks) passed, and six planted bugs were each caught. On the live site on a real iPhone (Safari engine, iOS 18.7, Nov 10, 2026), its self-test passed in a Safari tab (355 checks). It said Safari hasn't promised to keep the data, which iPhone often doesn't; backup codes cover that.
-- 1.1.12 (Nov 10, 2026: the "What for?" box on Today gets its own visible label and line; an older copy of the app no longer trims a plan saved by a newer version when loading, when another tab saves, or when bringing back an automatic copy) passed the toolkit's release check: versions agree, privacy lock up to date, self-test in headless Chrome at three sizes (354 checks each), accessibility checker clean at 4 sizes in light and dark (also with the update card showing), no security pattern leads. A separate headless check of the load path (21 checks) passed, and seven planted bugs were each caught. On the live site on a real iPhone (Safari engine, iOS 18.7, Nov 10, 2026), its self-test passed in a Safari tab (354 checks). It said Safari hasn't promised to keep the data, which iPhone often doesn't; backup codes cover that.
-- 1.1.11 (Nov 10, 2026: on Today, the "Spent something?" amount box gets its own line at the biggest text and on small phones, so its "0.00" hint isn't cut off; the self-test now checks the hint at all three text sizes) passed the toolkit's release check: versions agree, privacy lock up to date, self-test in headless Chrome at three sizes (332 checks each), accessibility checker clean at 4 sizes in light and dark, no security pattern leads. Three planted versions of the old layout were each caught. On the live site on a real iPhone (Safari engine, iOS 18.7, Nov 10, 2026), its self-test passed in a Safari tab (332 checks). It said Safari hasn't promised to keep the data, which iPhone often doesn't; backup codes cover that.
-- 1.1.10 (Nov 10, 2026: the restore checks. A pasted code over 5 MB is turned away, like files already were, and a backup from a newer version asks to update first instead of restoring with its new parts dropped) passed the toolkit's release check: versions agree, privacy lock up to date, self-test in headless Chrome at three sizes (326 checks each), accessibility checker clean at 4 sizes in light and dark, no security pattern leads. Seven planted bugs were each caught. On the live site on a real iPhone (Safari engine, iOS 18.7, Nov 10, 2026), its self-test passed in a Safari tab (326 checks). It said Safari hasn't promised to keep the data, which iPhone often doesn't; backup codes cover that.
-- 1.1.9 (Nov 10, 2026: added SECURITY.md and .gitignore from the Baseline kit; the app itself is unchanged) passed the toolkit's release check: versions agree, privacy lock up to date, self-test in headless Chrome at three sizes (286 checks each), accessibility checker clean at 4 sizes in light and dark, no security pattern leads. On the live site on a real iPhone (Safari engine, iOS 18.7, Nov 10, 2026), its self-test passed in a Safari tab (286 checks). It said Safari hasn't promised to keep the data, which iPhone often doesn't; backup codes cover that.
-- 1.1.8 (Nov 9, 2026: the Claude copy now says Till Payday has moved to the website; the website is unchanged) and 1.1.7 (Nov 9, 2026: the red Delete button in About no longer gets squashed with its words spilling out, on small phones or with bigger text) passed their self-tests in headless Chrome at three sizes (286 checks each). On the live site on a real iPhone (Safari engine, iOS 18.7, Nov 9, 2026), 1.1.8's self-test passed in a Safari tab and from the Home Screen app (286 checks each), and the red Delete button in About looked right. Both reports said Safari hasn't promised to keep the data, which iPhone often doesn't; backup codes cover that.
-- **The Claude copies are retired** (Nov 9, 2026). Both were republished one last time on 1.1.8 and get no more updates. See "Where it lives".
-- 1.1.6 (Nov 5, 2026: iPhone date boxes no longer stick out of their card) passed its self-test in headless Chrome at three sizes (286 checks each). Its real-iPhone check is covered by 1.1.8's iPhone self-test (Nov 9, 2026), whose check that every box fits inside its card passed.
-- 1.1.5 passed its self-test on the live site on a real iPhone (Safari engine, iOS 18.7, 286 checks, Nov 5, 2026) and the VoiceOver and Reduce Motion check. At zero brightness the gray text is faint; iPhone's Increase Contrast setting brightens it (the app already supports it).
-- Every past version is kept in GitHub's history. To roll back, find the version in CHANGELOG.md and restore that upload.
-
-## Where it lives
-
-- **This repo is the latest source.** Claude's workspace is temporary, so anything worth keeping gets saved here.
-- `index.html` is the whole app, `selftest.html` the self-test, and `sw.js` handles offline use (its version goes up with each release). Also README.md, manifest.webmanifest, the icons, `SECURITY.md` (how to report a problem privately; update its "Last checked" line after each security check) and `.gitignore` (both from the toolkit's Baseline kit). Files sit flat at the top of the repo (no folders).
-- **Version tags** are added automatically. `.github/workflows/tag-new-versions.yml` reads APP_VERSION from `index.html` on every push to main and adds the tag (like `v1.1.4`) if it doesn't exist yet. Claude's sessions can't push tags themselves, which is why it's done this way. Earlier versions (1.1.2 and before) have no tags.
-- **Claude copies (retired Nov 9, 2026):** two Claude pages, named "Till Payday" (saves to the Claude account) and "Till Payday Self-Test". Find them by name in the Claude artifacts list. Their links stay out of this repo. Both stay up on 1.1.8, which shows a "Till Payday has moved" note pointing to the website, with steps to bring a plan along by backup code. **Don't republish them on releases.** People's plans live in the app copy, so never delete it without asking. Only touch them again for a safety or data fix, using `artifact.html` and `selftest-artifact.html` from `rebuild.py`.
-- **Old address:** freestudycoach.github.io/till-payday holds only a "we've moved" page that forwards people here and helps anyone with a plan saved there bring it along. Never put the app back there. How it works is in how-to-update.md.
-- **Shared address:** freeforgood-apps.github.io is shared with Study Coach and more free apps to come. Each app keeps its own storage keys and offline cache names.
-
-## Next up
-
-- The self-test can't reload itself, so the load path (opening the app with a newer plan or damaged data saved, and which tab it opens on) is checked by a separate headless run at release time, not on the phone. The other-tab and copy paths share the same code and are in the self-test.
-- Spanish version: built for 1.0 (561 phrases in US Spanish) and set aside. It needs the 1.1 text translated before it comes back.
-- Keep the saving safety net matching Study Coach (backups, automatic copies, two-tap restore, damaged data set aside, reminders). Study Coach 2.5 copied it from here.
 
 ## Ground rules
 
@@ -43,6 +14,20 @@ A free paycheck planner for real budgets: one job or two, any pay schedule. It s
 - It's a planning tool, not financial advice. The app says it's a one-person volunteer project, built with help from AI, so feedback replies may take time.
 - Feedback goes to freeforgood-apps+payday@proton.me. The self-test makes a report people can email in.
 - Verify before handing anything over: parse-check, run it in a browser, test awkward cases (empty data, old saved data, undo, small phone screens), check nothing else broke, and do the math in code. Then say what was checked and what couldn't be.
+
+## Where it lives
+
+- **This repo is the latest source.** Claude's workspace is temporary, so anything worth keeping gets saved here.
+- `index.html` is the whole app, `selftest.html` the self-test, and `sw.js` handles offline use (its version goes up with each release). Also README.md, manifest.webmanifest, the icons, `SECURITY.md` (how to report a problem privately; update its "Last checked" line after each security check) and `.gitignore` (both from the toolkit's Baseline kit). Files sit flat at the top of the repo (no folders).
+- **Version tags** are added automatically. `.github/workflows/tag-new-versions.yml` reads APP_VERSION from `index.html` on every push to main and adds the tag (like `v1.1.4`) if it doesn't exist yet. Claude's sessions can't push tags themselves, which is why it's done this way. Earlier versions (1.1.2 and before) have no tags.
+- **Claude copies (retired Nov 9, 2026):** two Claude pages, named "Till Payday" (saves to the Claude account) and "Till Payday Self-Test". Find them by name in the Claude artifacts list. Their links stay out of this repo. Both stay up on 1.1.8, which shows a "Till Payday has moved" note pointing to the website, with steps to bring a plan along by backup code. **Don't republish them on releases.** People's plans live in the app copy, so never delete it without asking. Only touch them again for a safety or data fix, using `artifact.html` and `selftest-artifact.html` from `rebuild.py`.
+- **Old address:** freestudycoach.github.io/till-payday holds only a "we've moved" page that forwards people here and helps anyone with a plan saved there bring it along. Never put the app back there. How it works is in how-to-update.md.
+- **Shared address:** freeforgood-apps.github.io is shared with Study Coach and more free apps to come. Each app keeps its own storage keys and offline cache names.
+- **Rolling back:** every past version is kept in GitHub's history. To roll back, find the version in CHANGELOG.md and restore that upload.
+
+## How updates work
+
+Follow how-to-update.md. It has the release steps, how rebuild.py works, and the things that must not break.
 
 ## Decisions
 
@@ -61,6 +46,15 @@ Why some things are the way they are, so nobody "fixes" them by mistake:
 - **A plan saved by a newer version is shown but never saved over** (1.1.12), the same idea as restore turning away newer backups (1.1.10). "Newer" means a plan `v` above `DATA_V`. It applies when the app opens, when another tab saves, and when bringing back an automatic copy (which is turned away on the first tap). While held, the header shows "Not saving until Till Payday updates" on every tab instead of the backup line, the app opens on Today where the update card is, and Update now reloads the page (the offline helper asks the network first). Restoring a backup over a held plan is allowed (two taps), and its Undo writes the newer plan back exactly as it was saved. A backup made while held holds only what this version understands. The retired Claude copies' account saving isn't covered; they stay on 1.1.8.
 - **The Claude copies are retired** (1.1.8), because republishing and checking them on every release cost Claude usage for little gain: the website does more (file backups, offline, Home Screen). `movedCard` shows only when `WEB` is false, so the website never shows it.
 
-## How updates work
+## Where things stand (Nov 10, 2026)
 
-Follow how-to-update.md. It has the release steps, how rebuild.py works, and the things that must not break.
+- **Live version:** 1.1.13 (English) at https://freeforgood-apps.github.io/till-payday/
+- **Tested:** 1.1.13 passed the toolkit's release check and the separate headless load-path check (80 checks), and its self-test passed on the live site on a real iPhone in a Safari tab (Safari engine, iOS 18.7, 355 checks, Nov 10, 2026). CHANGELOG.md has the full "Tested:" notes for this and every earlier version.
+- **Last VoiceOver and Reduce Motion check on a real iPhone:** 1.1.5 (Nov 5, 2026). At zero brightness the gray text is faint; iPhone's Increase Contrast setting brightens it (the app already supports it).
+- **Known:** the iPhone self-test says Safari hasn't promised to keep the data, which iPhone often doesn't; backup codes cover that.
+
+## Next up
+
+- The self-test can't reload itself, so the load path (opening the app with a newer plan or damaged data saved, and which tab it opens on) is checked by a separate headless run at release time, not on the phone. The other-tab and copy paths share the same code and are in the self-test.
+- Spanish version: built for 1.0 (561 phrases in US Spanish) and set aside. It needs the 1.1 text translated before it comes back.
+- Keep the saving safety net matching Study Coach (backups, automatic copies, two-tap restore, damaged data set aside, reminders). Study Coach 2.5 copied it from here.
