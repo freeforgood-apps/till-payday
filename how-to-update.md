@@ -12,8 +12,8 @@ This repo (freeforgood-apps/till-payday) is the source. `index.html` is the whol
    - `artifact.html` and `selftest-artifact.html`: the Claude copies. **Retired Nov 9, 2026: don't publish them on releases.** They stay on 1.1.8 with a "moved" note. Use these files only for a safety or data fix to the old copies (see PROGRESS.md).
 4. Test everything the "Verify" rule in PROGRESS.md lists, and run the self-test.
    - Run the toolkit's release check with the backup sheet included, so its buttons get the accessibility check too: `bash /tmp/toolkit/release-check.sh <folder> --click 'button.add[data-open=backup]'` (set the toolkit up first, see its README). If you add another sheet, add another `--click` for it.
-5. Save `index.html`, `selftest.html` and `sw.js` to this repo, plus README.md if it changed, a new CHANGELOG.md entry, and an update to PROGRESS.md. All files sit flat at the top of the repo. They can also be uploaded by hand from a phone.
-6. Run the self-test on the live site afterwards, on a real iPhone.
+5. Save `index.html`, `selftest.html` and `sw.js` to this repo, plus README.md (a new headless Chrome row at the top of **Tested on**, and any feature or wording change), a new CHANGELOG.md entry, and an update to PROGRESS.md. All files sit flat at the top of the repo. They can also be uploaded by hand from a phone.
+6. Run the self-test on the live site afterwards, on a real iPhone, and add its row to README.md's **Tested on** (and its result to CHANGELOG.md and PROGRESS.md). Older rows can move out of the table once they're in CHANGELOG.md.
 
 ## Things that must not break
 - **The privacy lock.** `index.html` and `selftest.html` carry a Content-Security-Policy that only lets scripts run whose exact sha256 fingerprint is listed. Any edit to a script changes its fingerprint. Always run `rebuild.py` after editing, or the app won't start.
