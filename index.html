@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-2ZyFe3eg32g+BucoMulZLFJkFiaEvqCaMYd5sm7aWD8='; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src 'none'; manifest-src 'self'; worker-src 'self'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-src 'none'; media-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-H3yjOk5o926yYF1VXEqr5DjNwY5yU0Z5VNlOXxZ/Ndk='; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src 'none'; manifest-src 'self'; worker-src 'self'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-src 'none'; media-src 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="description" content="A free paycheck planner. Make each check last till payday, and save a little every time.">
 <meta name="theme-color" content="#EDF2F0" media="(prefers-color-scheme: light)">
@@ -1251,7 +1251,7 @@ html.locked body { overflow: hidden; }
   // The build swaps these two for the GitHub Pages copy (its own storage key, offline support)
   const LOCAL_KEY = "till-payday-v1";
   const WEB = true;
-  const APP_VERSION = "1.1.13";
+  const APP_VERSION = "1.1.14";
   const SITE = "https://freeforgood-apps.github.io/till-payday/";
   const FEEDBACK_EMAIL = "freeforgood-apps+payday@proton.me";
   document.documentElement.lang = "en";
@@ -2580,6 +2580,19 @@ html.locked body { overflow: hidden; }
     return bufB64(await crypto.subtle.deriveBits({ name: "PBKDF2", salt: b64Buf(saltB64), iterations: iter, hash: "SHA-256" }, base, 256));
   }
   const pinOk = (p) => /^\d{4,8}$/.test(p);
+  // A PIN saved with fewer rounds (before 1.1.14) is saved again with today's count once it's typed right.
+  // If anything changed the PIN meanwhile (turned off, another tab), or saving fails, the old one stays and still works.
+  async function upgradePin(pin) {
+    const was = pinCfg;
+    if (!was || (parseInt(was.iter, 10) || 0) >= KDF_ITER) return;
+    try {
+      const salt = bufB64(crypto.getRandomValues(new Uint8Array(16)));
+      const cfg = { v: 1, salt, iter: KDF_ITER, hash: await pinHash(pin, salt, KDF_ITER) };
+      if (pinCfg !== was) return;
+      localStorage.setItem(PIN_KEY, JSON.stringify(cfg));
+      if (localStorage.getItem(PIN_KEY) === JSON.stringify(cfg)) pinCfg = cfg;
+    } catch (e) {}
+  }
   function lockNow() {
     if (!pinCfg) return;
     locked = true;
@@ -2616,7 +2629,7 @@ html.locked body { overflow: hidden; }
     const pin = $("lockPin").value.trim();
     let good = false;
     try { good = pinOk(pin) && (await pinHash(pin, pinCfg.salt, pinCfg.iter)) === pinCfg.hash; } catch (err) { good = false; }
-    if (good) { writeWait({ fails: 0, until: 0 }); unlock(); $("lockMsg").textContent = ""; return; }
+    if (good) { writeWait({ fails: 0, until: 0 }); unlock(); $("lockMsg").textContent = ""; upgradePin(pin); return; }
     const fails = w.fails + 1;
     const until = fails >= 5 ? Date.now() + Math.min(30000 * Math.pow(2, fails - 5), 300000) : 0;
     writeWait({ fails, until });
@@ -2662,7 +2675,7 @@ html.locked body { overflow: hidden; }
     if (!pinOk(a)) { $("pinNew").focus(); toast("Use 4 to 8 numbers for your PIN."); return; }
     if (a !== b) { $("pinNew2").value = ""; $("pinNew2").focus(); toast("The two PINs don't match. Type it again."); return; }
     try {
-      const salt = bufB64(crypto.getRandomValues(new Uint8Array(16))), iter = 150000;
+      const salt = bufB64(crypto.getRandomValues(new Uint8Array(16))), iter = KDF_ITER;
       const cfg = { v: 1, salt, iter, hash: await pinHash(a, salt, iter) };
       localStorage.setItem(PIN_KEY, JSON.stringify(cfg));
       if (localStorage.getItem(PIN_KEY) !== JSON.stringify(cfg)) throw new Error("not saved");
@@ -4003,12 +4016,15 @@ html.locked body { overflow: hidden; }
   const canCrypt = () => !!(window.crypto && crypto.subtle && crypto.getRandomValues && window.TextEncoder);
   const bufB64 = (buf) => { const b = new Uint8Array(buf); let bin = ""; for (let i = 0; i < b.length; i += 0x8000) bin += String.fromCharCode.apply(null, b.subarray(i, i + 0x8000)); return btoa(bin); };
   const b64Buf = (t) => Uint8Array.from(atob(t), (c) => c.charCodeAt(0));
+  // PBKDF2-SHA256 rounds for new password backups and PINs (OWASP's advice). Each backup and PIN keeps its own count,
+  // so older ones still open: backups made before 1.1.14 used 250,000, PINs 150,000.
+  const KDF_ITER = 600000;
   async function passKey(pass, salt, iter, usage) {
     const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(pass), "PBKDF2", false, ["deriveKey"]);
     return crypto.subtle.deriveKey({ name: "PBKDF2", salt, iterations: iter, hash: "SHA-256" }, base, { name: "AES-GCM", length: 256 }, false, usage);
   }
   async function lockText(text, pass) {
-    const salt = crypto.getRandomValues(new Uint8Array(16)), iv = crypto.getRandomValues(new Uint8Array(12)), iter = 250000;
+    const salt = crypto.getRandomValues(new Uint8Array(16)), iv = crypto.getRandomValues(new Uint8Array(12)), iter = KDF_ITER;
     const key = await passKey(pass, salt, iter, ["encrypt"]);
     const data = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, new TextEncoder().encode(text));
     return { v: 1, kdf: "PBKDF2-SHA256", cipher: "AES-256-GCM", iter, salt: bufB64(salt), iv: bufB64(iv), data: bufB64(data) };

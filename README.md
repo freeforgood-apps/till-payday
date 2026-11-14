@@ -39,6 +39,7 @@ Results are tied to the version and date they were run. When the app changes, th
 
 | Version | Date | Browser and device | Result |
 |---|---|---|---|
+| 1.1.14 | Nov 14, 2026 | Chrome (Blink engine) on Linux, headless: full check at phone size, small phone size in dark mode and desktop size, plus a separate check of opening the app with a PIN from an older version, and of backups and PINs moving between this version and 1.1.13 | ✓ Passed, 377 automated checks at each size, and 21 in the separate check |
 | 1.1.13 | Nov 10, 2026 | The published GitHub Pages site, Safari engine (WebKit) on a real iPhone (iOS 18.7), in a Safari tab | ✓ Passed, 355 automated checks |
 | 1.1.13 | Nov 10, 2026 | Chrome (Blink engine) on Linux, headless: full check at phone size, small phone size in dark mode and desktop size, plus a separate check of opening the app with damaged data saved | ✓ Passed, 355 automated checks at each size, and 80 in the separate check |
 | 1.1.12 | Nov 10, 2026 | The published GitHub Pages site, Safari engine (WebKit) on a real iPhone (iOS 18.7), in a Safari tab | ✓ Passed, 354 automated checks |
@@ -54,7 +55,7 @@ Results are tied to the version and date they were run. When the app changes, th
 
 Earlier versions, back to 1.0, are in [`CHANGELOG.md`](CHANGELOG.md), each with its own "Tested:" line. The last VoiceOver and Reduce Motion check on a real iPhone was on 1.1.5 (Nov 5, 2026).
 
-**What the automated checks cover:** setting up a plan, bills and the paycheck split, every pay schedule, logging spending, where it went, checking off savings, the savings forecast and goal, paying off debt, counting cash, Can I afford it? (hours of work and sleep on it), the calculator, the calendar file and Google Calendar links, backups (files, codes, password-protected backups, older backups, and turning away backups from a newer version), automatic copies, checked saves, never saving over a plan saved by a newer version, two open tabs, the privacy lock, the PIN lock, Delete everything, the offline copy, that every button's spoken name includes its words, that every box fits inside its card, and that no screen scrolls sideways. The math is checked a second way, with the self-test's own date and money math.
+**What the automated checks cover:** setting up a plan, bills and the paycheck split, every pay schedule, logging spending, where it went, checking off savings, the savings forecast and goal, paying off debt, counting cash, Can I afford it? (hours of work and sleep on it), the calculator, the calendar file and Google Calendar links, backups (files, codes, password-protected backups, older backups, and turning away backups from a newer version), automatic copies, checked saves, never saving over a plan saved by a newer version, two open tabs, the privacy lock, the PIN lock (including a PIN set by an older version), Delete everything, the offline copy, that every button's spoken name includes its words, that every box fits inside its card, and that no screen scrolls sideways. The math is checked a second way, with the self-test's own date and money math.
 
 Chrome's engine also powers Microsoft Edge, Chromebooks, Android phones, Samsung Internet, Brave and Opera. Safari's engine powers Safari and nearly every other browser on iPhone and iPad.
 

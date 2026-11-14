@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-kDF8ihw/jMmwqy2zHZrQC2cQrSPUFRoZyhp/gVStYc0=' 'sha256-EGuKXUODL6WIHzMgaGHs3zv5HVlgckWR1X5u7X59uOo='; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src 'none'; manifest-src 'self'; worker-src 'self'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-src 'none'; media-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-RjufhwiCRxj+kW4/2xQy9XAmLfPm7Y4ZoOGcT0vDvx0=' 'sha256-3JOXo44ZBQ7UcdqtIPaeQBa8px/kvNuXuJFVQPeD4B8='; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src 'none'; manifest-src 'self'; worker-src 'self'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-src 'none'; media-src 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="description" content="A free paycheck planner. Make each check last till payday, and save a little every time.">
 <meta name="theme-color" content="#EDF2F0" media="(prefers-color-scheme: light)">
@@ -1251,7 +1251,7 @@ html.locked body { overflow: hidden; }
   // The build swaps these two for the GitHub Pages copy (its own storage key, offline support)
   const LOCAL_KEY = "till-payday-selftest-v1";
   const WEB = true;
-  const APP_VERSION = "1.1.13";
+  const APP_VERSION = "1.1.14";
   const SITE = "https://freeforgood-apps.github.io/till-payday/";
   const FEEDBACK_EMAIL = "freeforgood-apps+payday@proton.me";
   document.documentElement.lang = "en";
@@ -2580,6 +2580,19 @@ html.locked body { overflow: hidden; }
     return bufB64(await crypto.subtle.deriveBits({ name: "PBKDF2", salt: b64Buf(saltB64), iterations: iter, hash: "SHA-256" }, base, 256));
   }
   const pinOk = (p) => /^\d{4,8}$/.test(p);
+  // A PIN saved with fewer rounds (before 1.1.14) is saved again with today's count once it's typed right.
+  // If anything changed the PIN meanwhile (turned off, another tab), or saving fails, the old one stays and still works.
+  async function upgradePin(pin) {
+    const was = pinCfg;
+    if (!was || (parseInt(was.iter, 10) || 0) >= KDF_ITER) return;
+    try {
+      const salt = bufB64(crypto.getRandomValues(new Uint8Array(16)));
+      const cfg = { v: 1, salt, iter: KDF_ITER, hash: await pinHash(pin, salt, KDF_ITER) };
+      if (pinCfg !== was) return;
+      localStorage.setItem(PIN_KEY, JSON.stringify(cfg));
+      if (localStorage.getItem(PIN_KEY) === JSON.stringify(cfg)) pinCfg = cfg;
+    } catch (e) {}
+  }
   function lockNow() {
     if (!pinCfg) return;
     locked = true;
@@ -2616,7 +2629,7 @@ html.locked body { overflow: hidden; }
     const pin = $("lockPin").value.trim();
     let good = false;
     try { good = pinOk(pin) && (await pinHash(pin, pinCfg.salt, pinCfg.iter)) === pinCfg.hash; } catch (err) { good = false; }
-    if (good) { writeWait({ fails: 0, until: 0 }); unlock(); $("lockMsg").textContent = ""; return; }
+    if (good) { writeWait({ fails: 0, until: 0 }); unlock(); $("lockMsg").textContent = ""; upgradePin(pin); return; }
     const fails = w.fails + 1;
     const until = fails >= 5 ? Date.now() + Math.min(30000 * Math.pow(2, fails - 5), 300000) : 0;
     writeWait({ fails, until });
@@ -2662,7 +2675,7 @@ html.locked body { overflow: hidden; }
     if (!pinOk(a)) { $("pinNew").focus(); toast("Use 4 to 8 numbers for your PIN."); return; }
     if (a !== b) { $("pinNew2").value = ""; $("pinNew2").focus(); toast("The two PINs don't match. Type it again."); return; }
     try {
-      const salt = bufB64(crypto.getRandomValues(new Uint8Array(16))), iter = 150000;
+      const salt = bufB64(crypto.getRandomValues(new Uint8Array(16))), iter = KDF_ITER;
       const cfg = { v: 1, salt, iter, hash: await pinHash(a, salt, iter) };
       localStorage.setItem(PIN_KEY, JSON.stringify(cfg));
       if (localStorage.getItem(PIN_KEY) !== JSON.stringify(cfg)) throw new Error("not saved");
@@ -4003,12 +4016,15 @@ html.locked body { overflow: hidden; }
   const canCrypt = () => !!(window.crypto && crypto.subtle && crypto.getRandomValues && window.TextEncoder);
   const bufB64 = (buf) => { const b = new Uint8Array(buf); let bin = ""; for (let i = 0; i < b.length; i += 0x8000) bin += String.fromCharCode.apply(null, b.subarray(i, i + 0x8000)); return btoa(bin); };
   const b64Buf = (t) => Uint8Array.from(atob(t), (c) => c.charCodeAt(0));
+  // PBKDF2-SHA256 rounds for new password backups and PINs (OWASP's advice). Each backup and PIN keeps its own count,
+  // so older ones still open: backups made before 1.1.14 used 250,000, PINs 150,000.
+  const KDF_ITER = 600000;
   async function passKey(pass, salt, iter, usage) {
     const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(pass), "PBKDF2", false, ["deriveKey"]);
     return crypto.subtle.deriveKey({ name: "PBKDF2", salt, iterations: iter, hash: "SHA-256" }, base, { name: "AES-GCM", length: 256 }, false, usage);
   }
   async function lockText(text, pass) {
-    const salt = crypto.getRandomValues(new Uint8Array(16)), iv = crypto.getRandomValues(new Uint8Array(12)), iter = 250000;
+    const salt = crypto.getRandomValues(new Uint8Array(16)), iv = crypto.getRandomValues(new Uint8Array(12)), iter = KDF_ITER;
     const key = await passKey(pass, salt, iter, ["encrypt"]);
     const data = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, new TextEncoder().encode(text));
     return { v: 1, kdf: "PBKDF2-SHA256", cipher: "AES-256-GCM", iter, salt: bufB64(salt), iv: bufB64(iv), data: bufB64(data) };
@@ -4620,7 +4636,7 @@ html.locked body { overflow: hidden; }
   const KEY = "till-payday-selftest-v1";
   const REAL_KEY = "till-payday-v1";
   const WEBSITE = true;
-  const VERSION = "1.1.13";
+  const VERSION = "1.1.14";
   const EMAIL = "freeforgood-apps+payday@proton.me";
   const $ = (id) => document.getElementById(id);
   const q = (sel) => document.querySelector(sel);
@@ -5116,11 +5132,14 @@ html.locked body { overflow: hidden; }
         set($("bkPass"), "self-test password");
         clip = null;
         click($("bkCopy"));
-        for (let i = 0; i < 60 && !clip && $("bkCode").hidden; i++) await wait(100);
+        for (let i = 0; i < 200 && !clip && $("bkCode").hidden; i++) await wait(100);   // 600,000 rounds can take a few seconds on a slow phone
         const locked = clipPatched ? clip : $("bkCode").value;
         let readable = true;
         try { readable = /Rent|Phone|Card/.test(new TextDecoder().decode(Uint8Array.from(atob(locked.slice(9)), (c) => c.charCodeAt(0)))); } catch (e) {}
         ok("Password backup holds no readable numbers", !!locked && !readable);
+        let lockedIter = 0;
+        try { lockedIter = JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(locked.slice(9)), (c) => c.charCodeAt(0)))).encrypted.iter; } catch (e) {}
+        ok("New password backups use 600,000 rounds", lockedIter === 600000);
         $("bkProtect").checked = false; $("bkProtect").dispatchEvent(new Event("change", { bubbles: true }));
         closeSheet();
         tab("split"); click($("startOver")); click($("startOver"));
@@ -5128,11 +5147,11 @@ html.locked body { overflow: hidden; }
         set($("bkPaste"), locked);
         ok("Restore asks for the password", !$("bkRestorePass").hidden && labelShown("bkRestorePass"));
         set($("bkRestorePass"), "wrong password"); click($("bkRestore"));
-        for (let i = 0; i < 60 && !/password/.test(toastText()); i++) await wait(100);
+        for (let i = 0; i < 200 && !/password/.test(toastText()); i++) await wait(100);
         flush();
         ok("Wrong password refused", /doesn't open/.test(toastText()) && (saved() || {}).example === true);
         set($("bkRestorePass"), "self-test password"); click($("bkRestore"));
-        for (let i = 0; i < 60 && !/restored/.test(toastText()); i++) await wait(100);
+        for (let i = 0; i < 200 && !/restored/.test(toastText()); i++) await wait(100);
         flush();
         s = saved();
         ok("Right password restores the plan", !!(s && s.example === false && JSON.stringify(s.bills) === JSON.stringify(before.bills)));
@@ -5181,8 +5200,8 @@ html.locked body { overflow: hidden; }
         if (window.crypto && crypto.subtle) {
           // Locked here the same way the app does it, written separately (PBKDF2-SHA256, then AES-256-GCM)
           const raw = (buf) => { const u = new Uint8Array(buf); let s = ""; for (let i = 0; i < u.length; i++) s += String.fromCharCode(u[i]); return btoa(s); };
-          const lockIt = async (text, pass) => {
-            const salt = crypto.getRandomValues(new Uint8Array(16)), iv = crypto.getRandomValues(new Uint8Array(12)), iter = 1000;
+          const lockIt = async (text, pass, iter = 1000) => {
+            const salt = crypto.getRandomValues(new Uint8Array(16)), iv = crypto.getRandomValues(new Uint8Array(12));
             const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(pass), "PBKDF2", false, ["deriveKey"]);
             const key = await crypto.subtle.deriveKey({ name: "PBKDF2", salt, iterations: iter, hash: "SHA-256" }, base, { name: "AES-GCM", length: 256 }, false, ["encrypt"]);
             return { v: 1, kdf: "PBKDF2-SHA256", cipher: "AES-256-GCM", iter, salt: raw(salt), iv: raw(iv), data: raw(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, new TextEncoder().encode(text))) };
@@ -5196,6 +5215,21 @@ html.locked body { overflow: hidden; }
             ok("A newer password backup says to update first, once it's open", (await said(NEWER)) && untouched());
             tryCode(asCode({ app: "Till Payday", format: 2, saved: iso(T), encrypted: Object.assign({}, enc, { v: 2 }) }));
             ok("A newer kind of password lock says to update first", (await said(NEWER)) && untouched());
+          }
+          // A password backup from before 1.1.14 (250,000 rounds) still opens: each backup carries its own rounds count
+          let enc250 = null;
+          const oldLocked = wrap && wrap.plan ? JSON.parse(JSON.stringify(wrap.plan)) : null;
+          if (oldLocked && oldLocked.bills && oldLocked.bills[0]) oldLocked.bills[0].name = "Locked rent";
+          try { enc250 = oldLocked ? await lockIt(JSON.stringify(oldLocked), "self-test password", 250000) : null; } catch (e) {}
+          ok("Locked a 250,000-round test backup", !!enc250);
+          if (enc250) {
+            set($("bkRestorePass"), "");
+            tryCode(asCode({ app: "Till Payday", format: 2, saved: iso(T), encrypted: enc250 }));
+            set($("bkRestorePass"), "self-test password"); click($("bkRestore")); click($("bkRestore"));   // the second tap confirms replacing the plan
+            for (let i = 0; i < 200 && !/Plan restored/.test(toastText()); i++) await wait(100);
+            flush();
+            const s250 = saved() || {};
+            ok("A password backup from before 1.1.14 (250,000 rounds) still opens", s250.v === dataV && !!s250.bills && !!s250.bills[0] && s250.bills[0].name === "Locked rent");
           }
           set($("bkRestorePass"), ""); set($("bkPaste"), "");
         }
@@ -5315,21 +5349,51 @@ html.locked body { overflow: hidden; }
         click($("pinOpen"));
         ok("PIN boxes have labels you can see", labelShown("pinNew") && labelShown("pinNew2"));
         set($("pinNew"), "2468"); set($("pinNew2"), "2468"); click($("pinSet"));
-        for (let i = 0; i < 50 && !/PIN lock is on/.test(toastText()); i++) await wait(100);
+        for (let i = 0; i < 200 && !/PIN lock is on/.test(toastText()); i++) await wait(100);
         ok("PIN turns on", /PIN lock is on/.test(toastText()) && !/2468/.test(localStorage.getItem(KEY + "-pin") || "2468"));
+        const pinNow = () => { try { return JSON.parse(localStorage.getItem(KEY + "-pin")) || {}; } catch (e) { return {}; } };
+        ok("New PINs use 600,000 rounds", pinNow().iter === 600000);
         window.dispatchEvent(new StorageEvent("storage", { key: KEY + "-pin", newValue: localStorage.getItem(KEY + "-pin") }));
         ok("Locks", shown("lockScreen") && document.getElementById("app").getAttribute("aria-hidden") === "true");
         set($("lockPin"), "1111"); $("lockForm").dispatchEvent(new Event("submit", { cancelable: true }));
-        for (let i = 0; i < 50 && !text("lockMsg"); i++) await wait(100);
+        for (let i = 0; i < 200 && !text("lockMsg"); i++) await wait(100);
         expect("Wrong PIN", text("lockMsg"), "That PIN isn't right.");
         set($("lockPin"), "2468"); $("lockForm").dispatchEvent(new Event("submit", { cancelable: true }));
-        for (let i = 0; i < 50 && shown("lockScreen"); i++) await wait(100);
+        for (let i = 0; i < 200 && shown("lockScreen"); i++) await wait(100);
         ok("Right PIN unlocks", !shown("lockScreen"));
         tab("split"); click($("pinOpen"));
         ok("The turn-off PIN box has a label you can see", labelShown("pinOld"));
         set($("pinOld"), "2468"); click($("pinOffBtn"));
-        for (let i = 0; i < 50 && !/PIN lock is off/.test(toastText()); i++) await wait(100);
+        for (let i = 0; i < 200 && !/PIN lock is off/.test(toastText()); i++) await wait(100);
         ok("PIN turns off", !localStorage.getItem(KEY + "-pin"));
+        // A PIN set before 1.1.14 (150,000 rounds) still unlocks, then is saved again with 600,000. Hashed here separately, the way the app does it.
+        const raw64 = (buf) => { const u = new Uint8Array(buf); let s = ""; for (let i = 0; i < u.length; i++) s += String.fromCharCode(u[i]); return btoa(s); };
+        let oldPin = null;
+        try {
+          const salt = crypto.getRandomValues(new Uint8Array(16));
+          const base = await crypto.subtle.importKey("raw", new TextEncoder().encode("1357"), "PBKDF2", false, ["deriveBits"]);
+          oldPin = { v: 1, salt: raw64(salt), iter: 150000, hash: raw64(await crypto.subtle.deriveBits({ name: "PBKDF2", salt, iterations: 150000, hash: "SHA-256" }, base, 256)) };
+        } catch (e) {}
+        ok("Made a 150,000-round test PIN", !!oldPin);
+        if (oldPin) {
+          const lockAgain = () => window.dispatchEvent(new StorageEvent("storage", { key: KEY + "-pin", newValue: localStorage.getItem(KEY + "-pin") }));
+          localStorage.setItem(KEY + "-pin", JSON.stringify(oldPin));
+          lockAgain();
+          ok("An older PIN locks", shown("lockScreen"));
+          set($("lockPin"), "1357"); $("lockForm").dispatchEvent(new Event("submit", { cancelable: true }));
+          for (let i = 0; i < 200 && (shown("lockScreen") || pinNow().iter !== 600000); i++) await wait(100);
+          ok("A PIN set before 1.1.14 (150,000 rounds) still unlocks", !shown("lockScreen"));
+          ok("Then it's saved again with 600,000 rounds", pinNow().iter === 600000 && pinNow().hash !== oldPin.hash && pinNow().salt !== oldPin.salt && !/1357/.test(localStorage.getItem(KEY + "-pin")));
+          lockAgain();
+          set($("lockPin"), "1357"); $("lockForm").dispatchEvent(new Event("submit", { cancelable: true }));
+          for (let i = 0; i < 200 && shown("lockScreen"); i++) await wait(100);
+          ok("The re-saved PIN unlocks", !shown("lockScreen"));
+          tab("split"); click($("pinOpen"));
+          $("toastMsg").textContent = "";
+          set($("pinOld"), "1357"); click($("pinOffBtn"));
+          for (let i = 0; i < 200 && !/PIN lock is off/.test(toastText()); i++) await wait(100);
+          ok("The re-saved PIN turns off", !localStorage.getItem(KEY + "-pin"));
+        }
         closeSheet();
       } else notes.push("PIN lock: this browser can't do it, so the option is hidden");
 
