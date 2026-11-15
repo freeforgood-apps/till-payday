@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-RjufhwiCRxj+kW4/2xQy9XAmLfPm7Y4ZoOGcT0vDvx0=' 'sha256-3JOXo44ZBQ7UcdqtIPaeQBa8px/kvNuXuJFVQPeD4B8='; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src 'none'; manifest-src 'self'; worker-src 'self'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-src 'none'; media-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-sKVaHbc58vp6MA+Z17OTInNcyJzE2mRe8Wrw7EaQl08=' 'sha256-HQkjhg74R5CHxai+ojqWMNZ65bXNvhKP3e4eRZNjyBY='; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src 'none'; manifest-src 'self'; worker-src 'self'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-src 'none'; media-src 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="description" content="A free paycheck planner. Make each check last till payday, and save a little every time.">
 <meta name="theme-color" content="#EDF2F0" media="(prefers-color-scheme: light)">
@@ -1075,9 +1075,9 @@ html.locked body { overflow: hidden; }
 <div class="lock" id="lockScreen" role="dialog" aria-modal="true" aria-labelledby="lockTitle" hidden>
   <div class="lock-box">
     <p class="lock-name">Till Payday</p>
-    <h2 id="lockTitle">Enter your PIN</h2>
+    <h2><label id="lockTitle" for="lockPin">Enter your PIN</label></h2>
     <form id="lockForm" novalidate>
-      <input type="password" id="lockPin" inputmode="numeric" autocomplete="off" maxlength="8" aria-label="PIN" placeholder="PIN">
+      <input type="password" id="lockPin" inputmode="numeric" autocomplete="off" maxlength="8">
       <button class="primary wide" type="submit" id="lockGo">Unlock</button>
     </form>
     <p class="lock-msg" id="lockMsg" aria-live="polite"></p>
@@ -1251,7 +1251,7 @@ html.locked body { overflow: hidden; }
   // The build swaps these two for the GitHub Pages copy (its own storage key, offline support)
   const LOCAL_KEY = "till-payday-selftest-v1";
   const WEB = true;
-  const APP_VERSION = "1.1.14";
+  const APP_VERSION = "1.1.15";
   const SITE = "https://freeforgood-apps.github.io/till-payday/";
   const FEEDBACK_EMAIL = "freeforgood-apps+payday@proton.me";
   document.documentElement.lang = "en";
@@ -2602,12 +2602,14 @@ html.locked body { overflow: hidden; }
     $("app").inert = true;
     $("toast").hidden = true;
     $("lockPin").value = "";
+    $("lockMsg").textContent = "";
     $("lockForgotBox").hidden = true;
     lockWaitMsg();
     setTimeout(() => { try { $("lockPin").focus(); } catch (e) {} }, 50);
   }
   function unlock() {
     locked = false;
+    $("lockPin").value = "";   // the PIN is never kept around after unlocking
     $("lockScreen").hidden = true;
     document.documentElement.classList.remove("locked");
     $("app").removeAttribute("aria-hidden");
@@ -2615,11 +2617,18 @@ html.locked body { overflow: hidden; }
   }
   function readWait() { try { const w = JSON.parse(localStorage.getItem(WAIT_KEY) || "{}"); return { fails: w.fails | 0, until: +w.until || 0 }; } catch (e) { return { fails: 0, until: 0 }; } }
   function writeWait(w) { try { localStorage.setItem(WAIT_KEY, JSON.stringify(w)); } catch (e) {} }
-  function lockWaitMsg() {
-    const w = readWait(), left = Math.ceil((w.until - Date.now()) / 1000);
-    $("lockMsg").textContent = left > 0 ? "Too many tries. Try again in " + plural(left, "second") + "." : "";
+  // Too many wrong tries: Unlock waits. Said once, not counted down out loud (VoiceOver would read every second),
+  // then "You can try again now." when the wait is over. One timer at a time.
+  let waitTimer = null;
+  function lockWaitMsg(say) {
+    clearTimeout(waitTimer);
+    const left = readWait().until - Date.now();
     $("lockGo").disabled = left > 0;
-    if (left > 0) setTimeout(lockWaitMsg, 1000);
+    if (left > 0) {
+      const s = Math.ceil(left / 1000);
+      $("lockMsg").textContent = "Too many tries. Wait " + (s >= 60 && s % 60 === 0 ? plural(s / 60, "minute") : plural(s, "second")) + ", then try again.";
+      waitTimer = setTimeout(() => lockWaitMsg(true), Math.min(left, 2147483647));
+    } else if (say) $("lockMsg").textContent = "You can try again now.";
   }
   $("lockForm").addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -2634,9 +2643,12 @@ html.locked body { overflow: hidden; }
     const until = fails >= 5 ? Date.now() + Math.min(30000 * Math.pow(2, fails - 5), 300000) : 0;
     writeWait({ fails, until });
     $("lockPin").value = "";
-    $("lockMsg").textContent = "That PIN isn't right.";
+    $("lockMsg").textContent = "";
     if (until) lockWaitMsg();
+    else setTimeout(() => { $("lockMsg").textContent = "That PIN isn't right."; }, 60);   // read out again on every wrong try
   });
+  // Typing again after a wait that's over lets Unlock work right away
+  $("lockPin").addEventListener("input", () => { if ($("lockGo").disabled && readWait().until <= Date.now()) lockWaitMsg(true); });
   $("lockForgot").addEventListener("click", () => { $("lockForgotBox").hidden = false; });
   let lockWipeArmed = null;
   $("lockWipe").addEventListener("click", () => {
@@ -4636,7 +4648,7 @@ html.locked body { overflow: hidden; }
   const KEY = "till-payday-selftest-v1";
   const REAL_KEY = "till-payday-v1";
   const WEBSITE = true;
-  const VERSION = "1.1.14";
+  const VERSION = "1.1.15";
   const EMAIL = "freeforgood-apps+payday@proton.me";
   const $ = (id) => document.getElementById(id);
   const q = (sel) => document.querySelector(sel);
@@ -5355,12 +5367,40 @@ html.locked body { overflow: hidden; }
         ok("New PINs use 600,000 rounds", pinNow().iter === 600000);
         window.dispatchEvent(new StorageEvent("storage", { key: KEY + "-pin", newValue: localStorage.getItem(KEY + "-pin") }));
         ok("Locks", shown("lockScreen") && document.getElementById("app").getAttribute("aria-hidden") === "true");
-        set($("lockPin"), "1111"); $("lockForm").dispatchEvent(new Event("submit", { cancelable: true }));
-        for (let i = 0; i < 200 && !text("lockMsg"); i++) await wait(100);
+        ok("The PIN box has a label you can see", labelShown("lockPin"));
+        // Every wrong try is read out, even when the words are the same as last time (1.1.15)
+        const said = [];
+        const watch = new MutationObserver(() => said.push(text("lockMsg")));
+        watch.observe($("lockMsg"), { childList: true, characterData: true, subtree: true });
+        const tryPin = async (pin) => { set($("lockPin"), pin); $("lockMsg").textContent = ""; $("lockForm").dispatchEvent(new Event("submit", { cancelable: true })); for (let i = 0; i < 200 && !text("lockMsg") && shown("lockScreen"); i++) await wait(100); await wait(80); };
+        await tryPin("1111");
         expect("Wrong PIN", text("lockMsg"), "That PIN isn't right.");
+        said.length = 0;   // the second try is left to the app alone: it clears the message, then says it again
+        set($("lockPin"), "1112"); $("lockForm").dispatchEvent(new Event("submit", { cancelable: true }));
+        for (let i = 0; i < 200 && said[said.length - 1] !== "That PIN isn't right."; i++) await wait(50);
+        await wait(80);
+        watch.disconnect();
+        ok("A second wrong PIN is read out again (the message clears, then comes back)", said.indexOf("") >= 0 && said.lastIndexOf("That PIN isn't right.") > said.indexOf(""));
         set($("lockPin"), "2468"); $("lockForm").dispatchEvent(new Event("submit", { cancelable: true }));
         for (let i = 0; i < 200 && shown("lockScreen"); i++) await wait(100);
         ok("Right PIN unlocks", !shown("lockScreen"));
+        ok("The PIN isn't left in its box after unlocking", $("lockPin").value === "");
+        // Too many wrong tries: it waits, said once rather than counted down out loud (1.1.15)
+        window.dispatchEvent(new StorageEvent("storage", { key: KEY + "-pin", newValue: localStorage.getItem(KEY + "-pin") }));
+        for (let t = 0; t < 5; t++) await tryPin("0000");
+        const waitSaid = text("lockMsg");
+        expect("After 5 wrong tries", waitSaid, "Too many tries. Wait 30 seconds, then try again.");
+        ok("Unlock waits", $("lockGo").disabled);
+        await wait(1200);
+        ok("The wait isn't counted down out loud", text("lockMsg") === waitSaid);
+        await tryPin("2468");
+        ok("Even the right PIN waits", shown("lockScreen"));
+        localStorage.setItem(KEY + "-pinwait", JSON.stringify({ fails: 5, until: Date.now() - 1 }));
+        set($("lockPin"), "2");
+        ok("When the wait is over, Unlock works again", !$("lockGo").disabled && text("lockMsg") === "You can try again now.");
+        set($("lockPin"), "2468"); $("lockForm").dispatchEvent(new Event("submit", { cancelable: true }));
+        for (let i = 0; i < 200 && shown("lockScreen"); i++) await wait(100);
+        ok("…and the right PIN opens it", !shown("lockScreen") && JSON.parse(localStorage.getItem(KEY + "-pinwait")).fails === 0);
         tab("split"); click($("pinOpen"));
         ok("The turn-off PIN box has a label you can see", labelShown("pinOld"));
         set($("pinOld"), "2468"); click($("pinOffBtn"));

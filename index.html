@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-H3yjOk5o926yYF1VXEqr5DjNwY5yU0Z5VNlOXxZ/Ndk='; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src 'none'; manifest-src 'self'; worker-src 'self'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-src 'none'; media-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-YNF/67RuckbUqTKBbWrTJKjErya16kvuSyVCoMzIZRk='; style-src 'unsafe-inline'; img-src 'self' data: blob:; font-src data:; connect-src 'none'; manifest-src 'self'; worker-src 'self'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-src 'none'; media-src 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="description" content="A free paycheck planner. Make each check last till payday, and save a little every time.">
 <meta name="theme-color" content="#EDF2F0" media="(prefers-color-scheme: light)">
@@ -1075,9 +1075,9 @@ html.locked body { overflow: hidden; }
 <div class="lock" id="lockScreen" role="dialog" aria-modal="true" aria-labelledby="lockTitle" hidden>
   <div class="lock-box">
     <p class="lock-name">Till Payday</p>
-    <h2 id="lockTitle">Enter your PIN</h2>
+    <h2><label id="lockTitle" for="lockPin">Enter your PIN</label></h2>
     <form id="lockForm" novalidate>
-      <input type="password" id="lockPin" inputmode="numeric" autocomplete="off" maxlength="8" aria-label="PIN" placeholder="PIN">
+      <input type="password" id="lockPin" inputmode="numeric" autocomplete="off" maxlength="8">
       <button class="primary wide" type="submit" id="lockGo">Unlock</button>
     </form>
     <p class="lock-msg" id="lockMsg" aria-live="polite"></p>
@@ -1251,7 +1251,7 @@ html.locked body { overflow: hidden; }
   // The build swaps these two for the GitHub Pages copy (its own storage key, offline support)
   const LOCAL_KEY = "till-payday-v1";
   const WEB = true;
-  const APP_VERSION = "1.1.14";
+  const APP_VERSION = "1.1.15";
   const SITE = "https://freeforgood-apps.github.io/till-payday/";
   const FEEDBACK_EMAIL = "freeforgood-apps+payday@proton.me";
   document.documentElement.lang = "en";
@@ -2602,12 +2602,14 @@ html.locked body { overflow: hidden; }
     $("app").inert = true;
     $("toast").hidden = true;
     $("lockPin").value = "";
+    $("lockMsg").textContent = "";
     $("lockForgotBox").hidden = true;
     lockWaitMsg();
     setTimeout(() => { try { $("lockPin").focus(); } catch (e) {} }, 50);
   }
   function unlock() {
     locked = false;
+    $("lockPin").value = "";   // the PIN is never kept around after unlocking
     $("lockScreen").hidden = true;
     document.documentElement.classList.remove("locked");
     $("app").removeAttribute("aria-hidden");
@@ -2615,11 +2617,18 @@ html.locked body { overflow: hidden; }
   }
   function readWait() { try { const w = JSON.parse(localStorage.getItem(WAIT_KEY) || "{}"); return { fails: w.fails | 0, until: +w.until || 0 }; } catch (e) { return { fails: 0, until: 0 }; } }
   function writeWait(w) { try { localStorage.setItem(WAIT_KEY, JSON.stringify(w)); } catch (e) {} }
-  function lockWaitMsg() {
-    const w = readWait(), left = Math.ceil((w.until - Date.now()) / 1000);
-    $("lockMsg").textContent = left > 0 ? "Too many tries. Try again in " + plural(left, "second") + "." : "";
+  // Too many wrong tries: Unlock waits. Said once, not counted down out loud (VoiceOver would read every second),
+  // then "You can try again now." when the wait is over. One timer at a time.
+  let waitTimer = null;
+  function lockWaitMsg(say) {
+    clearTimeout(waitTimer);
+    const left = readWait().until - Date.now();
     $("lockGo").disabled = left > 0;
-    if (left > 0) setTimeout(lockWaitMsg, 1000);
+    if (left > 0) {
+      const s = Math.ceil(left / 1000);
+      $("lockMsg").textContent = "Too many tries. Wait " + (s >= 60 && s % 60 === 0 ? plural(s / 60, "minute") : plural(s, "second")) + ", then try again.";
+      waitTimer = setTimeout(() => lockWaitMsg(true), Math.min(left, 2147483647));
+    } else if (say) $("lockMsg").textContent = "You can try again now.";
   }
   $("lockForm").addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -2634,9 +2643,12 @@ html.locked body { overflow: hidden; }
     const until = fails >= 5 ? Date.now() + Math.min(30000 * Math.pow(2, fails - 5), 300000) : 0;
     writeWait({ fails, until });
     $("lockPin").value = "";
-    $("lockMsg").textContent = "That PIN isn't right.";
+    $("lockMsg").textContent = "";
     if (until) lockWaitMsg();
+    else setTimeout(() => { $("lockMsg").textContent = "That PIN isn't right."; }, 60);   // read out again on every wrong try
   });
+  // Typing again after a wait that's over lets Unlock work right away
+  $("lockPin").addEventListener("input", () => { if ($("lockGo").disabled && readWait().until <= Date.now()) lockWaitMsg(true); });
   $("lockForgot").addEventListener("click", () => { $("lockForgotBox").hidden = false; });
   let lockWipeArmed = null;
   $("lockWipe").addEventListener("click", () => {

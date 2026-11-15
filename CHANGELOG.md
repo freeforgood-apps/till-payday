@@ -1,5 +1,12 @@
 # Till Payday: changelog
 
+## 1.1.15 (Nov 14, 2026)
+- Accessibility: the PIN screen's box now has a label you can see ("Enter your PIN" above it is its label), in place of a "PIN" hint that disappeared once you started typing. VoiceOver reads the same words you see.
+- Accessibility: after 5 wrong tries, the wait is said once ("Too many tries. Wait 30 seconds, then try again.") instead of counting down every second, which VoiceOver would read out each time. When the wait is over, it says "You can try again now", and typing again unlocks the button right away if the wait already ran out.
+- Accessibility: every wrong PIN is read out, not just the first one in a row.
+- Security: the PIN no longer stays in its box after unlocking.
+- Tested: the toolkit's release check passed every line: versions agree, the privacy lock is up to date on both pages, the self-test passed in headless Chrome at three sizes (395 checks each, up from 377), the accessibility checker found nothing at 4 sizes in light and dark mode on the main screen, with the backup sheet open and with the PIN sheet open, and the security patterns found nothing since 1.1.14. The self-test's new checks (the PIN box's label, every wrong try read out, the PIN cleared after unlocking, the wait said once and not counted down, the right PIN waiting too, and Unlock working again when the wait is over) each caught their bug when it was put back on purpose (4 of 4). Separately, axe (WCAG 2.2 AA) and the 44px and 16px checks found nothing on the PIN screen itself, after 5 wrong tries, and with Forgot your PIN? open, at 4 sizes in light and dark (24 runs). Before and after screenshots of the PIN screen look the same apart from the hint. Security release check: nothing personal or secret, no debug code, no new storage or outside requests. Not yet: the self-test on a real iPhone, and VoiceOver on the PIN screen.
+
 ## 1.1.14 (Nov 14, 2026)
 - Security: backup passwords and the PIN lock are now much harder to guess by trying passwords on a computer. New password backups use 600,000 rounds of PBKDF2-SHA256 (up from 250,000), and new PINs use 600,000 too (up from 150,000), the amount OWASP recommends.
 - Password backups you made before still open with the same password, and new ones open in older versions too (every version since 1.1 reads the rounds from the backup itself). If you already have a PIN, it works the same, and the next time you type it right, Till Payday quietly saves it again the stronger way. Your plan isn't affected.
